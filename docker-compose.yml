@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # ── 1. Nginx API Gateway & Reverse Proxy ──────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: flashtiket-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./dist:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    networks:
+      - flashtiket-network
+
+  # ── 2. Core REST API Server (Node.js Express) ──────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: flashtiket-backend
+    restart: always
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - PG_HOST=postgres
+      - PG_PORT=5432
+      - PG_USER=postgres
+      - PG_PASSWORD=flashtiket_secret_2026
+      - PG_DATABASE=flashtiket
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=flashtiket_production_super_secret_jwt_key_2026
+      - JWT_EXPIRES_IN=7d
+      - RATE_LIMIT_WINDOW_MS=60000
+      - RATE_LIMIT_MAX_REQUESTS=100
+      - LOCK_TTL_SECONDS=900
+      - QUEUE_BATCH_SIZE=50
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - flashtiket-network
+
+  # ── 3. Database Relasional (PostgreSQL v16) ─────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: flashtiket-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=flashtiket_secret_2026
+      - POSTGRES_DB=flashtiket
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/src/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d flashtiket"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flashtiket-network
+
+  # ── 4. In-Memory Atomic Engine & Distributed Lock (Redis v7) ───────
+  redis:
+    image: redis:7-alpine
+    container_name: flashtiket-redis
+    restart: always
+    command: redis-server --appendonly yes --requirepass ""
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - flashtiket-network
+
+networks:
+  flashtiket-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

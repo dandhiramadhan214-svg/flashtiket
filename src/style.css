@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+    background-color: #f8fafc;
+    color: #1e293b;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
+  .dark body {
+    background-color: #020617;
+    color: #f8fafc;
+  }
+}
+
+/* Explicit high-contrast classes with full dark-mode harmony */
+.bg-navy {
+  background-color: #1e266d;
+}
+.text-navy {
+  color: #1e266d;
+}
+.border-navy {
+  border-color: #1e266d;
+}
+
+/* Dark mode overrides for high-contrast visibility */
+.dark .text-navy {
+  color: #38bdf8 !important; /* Crisp Sky Blue for dark background */
+}
+.dark .bg-navy {
+  background-color: #1e266d;
+}
+.dark .border-navy {
+  border-color: #38bdf8;
+}
+
+.hover\:bg-navy-light:hover {
+  background-color: #2d3a8c;
+}
+
+.bg-navy-gradient {
+  background: linear-gradient(135deg, #1e266d 0%, #161c4f 50%, #0f153d 100%);
+}
+.dark .bg-navy-gradient {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+}
+
+/* Dark mode tints for alert badges so text stays 100% visible */
+.dark .bg-coral-light {
+  background-color: rgba(225, 29, 72, 0.18) !important;
+}
+.dark .bg-amber-light {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+}
+.dark .bg-sky-light {
+  background-color: rgba(56, 189, 248, 0.18) !important;
+}
+.dark .bg-mint-light {
+  background-color: rgba(16, 185, 129, 0.18) !important;
+}
+
+/* Minimal Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.dark ::-webkit-scrollbar-thumb { background: #334155; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* Utility: subtle gradient text */
+.text-gradient-navy {
+  background: linear-gradient(135deg, #1e266d, #4f8cff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.dark .text-gradient-navy {
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Animated progress bar fill */
+@keyframes progressPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.animate-progress-pulse {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+/* Smooth stage transitions */
+.stage-fade-enter-active,
+.stage-fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.stage-fade-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.stage-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
