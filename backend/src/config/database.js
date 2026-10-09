@@ -14,33 +14,47 @@ const { Pool } = pg;
 let isPostgresAvailable = false;
 let checkDone = false;
 
-const pool = new Pool({
-  host: process.env.PG_HOST || 'localhost',
-  port: parseInt(process.env.PG_PORT || '5432'),
-  user: process.env.PG_USER || 'postgres',
-  password: process.env.PG_PASSWORD || 'postgres',
-  database: process.env.PG_DATABASE || 'flashtiket',
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000, // Fast 2s timeout for fallback
-});
+const shouldTryPostgres = Boolean(
+  process.env.PG_HOST &&
+  process.env.PG_HOST !== 'localhost' &&
+  !process.env.VERCEL
+);
 
-// Quick probe on startup
-pool.connect()
-  .then((client) => {
-    isPostgresAvailable = true;
-    checkDone = true;
-    console.log('  📦 PostgreSQL connected successfully');
-    client.release();
-  })
-  .catch((_err) => {
-    isPostgresAvailable = false;
-    checkDone = true;
-    console.log('  ℹ️  PostgreSQL offline/tidak terdeteksi.');
-    console.log('  💡 Beralih otomatis ke In-Memory Data Store (Semua fitur tetap aktif)');
-    // Sync initial stock to Redis if available
-    inMemoryStore.syncToRedis(redis);
+let pool = null;
+
+if (shouldTryPostgres) {
+  pool = new Pool({
+    host: process.env.PG_HOST,
+    port: parseInt(process.env.PG_PORT || '5432'),
+    user: process.env.PG_USER || 'postgres',
+    password: process.env.PG_PASSWORD || 'postgres',
+    database: process.env.PG_DATABASE || 'flashtiket',
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
   });
+
+  pool.connect()
+    .then((client) => {
+      isPostgresAvailable = true;
+      checkDone = true;
+      console.log('  📦 PostgreSQL connected successfully');
+      client.release();
+    })
+    .catch((_err) => {
+      isPostgresAvailable = false;
+      checkDone = true;
+    });
+
+  pool.on('error', (err) => {
+    if (isPostgresAvailable) {
+      console.error('  ❌ PostgreSQL pool error:', err.message);
+    }
+  });
+} else {
+  isPostgresAvailable = false;
+  checkDone = true;
+}
 
 pool.on('error', (err) => {
   if (isPostgresAvailable) {
