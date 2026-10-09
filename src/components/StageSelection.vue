@@ -167,7 +167,10 @@ function selectCategoryZone(catKey) {
 }
 
 function handleLock() {
-  ticketStore.setSelectedSeat(selectedSeat.value.name, selectedSeat.value.zone, selectedSeat.value.category);
+  const seatName = ticketStore.quantity === 2 && selectedSeat.value.category !== 'cat1'
+    ? `${selectedSeat.value.name} & Berdampingan (2 Kursi)`
+    : selectedSeat.value.name;
+  ticketStore.setSelectedSeat(seatName, selectedSeat.value.zone, selectedSeat.value.category);
   const success = ticketStore.lockTickets();
   if (success) {
     queueStore.setStage('checkout');
@@ -460,12 +463,16 @@ const cats = [
           <!-- Seat Assigned Preview -->
           <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between">
             <div>
-              <div class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold uppercase">Nomor Kursi Terpilih</div>
-              <div class="text-sm font-extrabold text-navy dark:text-sky font-mono">{{ selectedSeat.name }}</div>
+              <div class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold uppercase">
+                {{ selectedSeat.category === 'cat1' ? 'Area Masuk' : (ticketStore.quantity === 2 ? 'Nomor Kursi (2 Kursi Berdampingan)' : 'Nomor Kursi Terpilih') }}
+              </div>
+              <div class="text-sm font-extrabold text-navy dark:text-sky font-mono">
+                {{ selectedSeat.category === 'cat1' ? 'Festival Standing Entry' : (ticketStore.quantity === 2 ? `${selectedSeat.name} & Berdampingan` : selectedSeat.name) }}
+              </div>
               <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ selectedSeat.zone }}</div>
             </div>
             <span class="px-2.5 py-1 rounded-full bg-mint-light dark:bg-emerald-950/40 text-mint dark:text-emerald-400 text-[11px] font-bold">
-              Terkonfirmasi
+              {{ ticketStore.quantity === 2 ? '2 Kursi Terpilih' : 'Terkonfirmasi' }}
             </span>
           </div>
 
