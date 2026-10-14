@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useInspectorStore } from './inspectorStore';
 import { useEventsStore } from './eventsStore';
+import { supabase } from '../services/supabaseClient';
 
 export const useTicketStore = defineStore('ticket', () => {
   const inspector = useInspectorStore();
@@ -246,6 +247,59 @@ export const useTicketStore = defineStore('ticket', () => {
     inspector.appendLog('REDIS', `PERSIST "lock:order:${orderId}" -> Promoted to permanent reservation.`);
     inspector.appendLog('WORKER', `Ticket Generation Worker issued cryptographic QR Code & PDF ticket.`);
 
+    async function syncToSupabaseOnline(payload) {
+      try {
+        inspector.appendLog('POSTGRES', `[SUPABASE CLOUD] Persisting transaction ${payload.orderId} to PostgreSQL...`);
+        
+        // 1. Insert into orders table in Supabase
+        const { error: orderErr } = await supabase.from('orders').insert({
+          event_id: payload.eventId,
+          customer_name: payload.customer.name,
+          customer_email: payload.customer.email,
+          customer_phone: payload.customer.phone || '-',
+          customer_nik: payload.customer.nik,
+          total_amount: payload.totalAmount,
+          status: 'PAID',
+          expires_at: new Date(Date.now() + 600000).toISOString(),
+          paid_at: new Date().toISOString()
+        });
+
+        if (orderErr) {
+          inspector.appendLog('POSTGRES', `Supabase order log: ${orderErr.message}`);
+        } else {
+          inspector.appendLog('POSTGRES', `✓ [SUPABASE CLOUD] Order ${payload.orderId} successfully persisted in online table 'orders'!`);
+        }
+
+        // 2. Insert into tickets table in Supabase
+        const catId = payload.category === 'vip' 
+          ? (payload.eventId === 1 ? 1 : 4) 
+          : (payload.category === 'cat1' ? (payload.eventId === 1 ? 2 : 5) : (payload.eventId === 1 ? 3 : 6));
+
+        const ticketRows = payload.attendees.map((att, idx) => ({
+          event_id: payload.eventId,
+          category_id: catId,
+          attendee_name: att.name,
+          attendee_nik: att.nik,
+          seat_number: att.seat || payload.seats[idx] || `SEAT-${idx + 1}`,
+          qr_code_token: `QR-${Math.random().toString(36).substring(2, 12).toUpperCase()}`,
+          status: 'ACTIVE'
+        }));
+
+        const { error: ticketErr } = await supabase.from('tickets').insert(ticketRows);
+        if (ticketErr) {
+          if (ticketErr.message.includes('idx_unique_event_attendee_nik')) {
+            inspector.appendLog('ERROR', `🛡️ [ANTI-CALO TRIGGERED] Supabase rejected duplicate NIK in same concert: ${ticketErr.message}`);
+          } else {
+            inspector.appendLog('POSTGRES', `Supabase ticket note: ${ticketErr.message}`);
+          }
+        } else {
+          inspector.appendLog('POSTGRES', `✓ [SUPABASE CLOUD] ${ticketRows.length} Individual E-Tickets saved to online table 'tickets'!`);
+        }
+      } catch (err) {
+        inspector.appendLog('POSTGRES', `Supabase sync note: ${err.message}`);
+      }
+    }
+
     issuedTicket.value = {
       orderId,
       holderName: customer.value.name,
@@ -258,6 +312,18 @@ export const useTicketStore = defineStore('ticket', () => {
       totalPaid: grandTotal.value,
       issuedAt: new Date().toLocaleDateString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
     };
+
+    // Trigger cloud sync to Supabase
+    const activeEventId = eventsStore.selectedEvent?.id === 'coldplay-jkt-2026' ? 1 : 2;
+    syncToSupabaseOnline({
+      orderId,
+      eventId: activeEventId,
+      customer: customer.value,
+      totalAmount: grandTotal.value,
+      category: cat,
+      seats: [...selectedSeats.value],
+      attendees: [...attendees.value],
+    });
 
     return true;
   }
