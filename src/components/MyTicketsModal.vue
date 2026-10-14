@@ -1,10 +1,54 @@
 <script setup>
+import { ref } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import { useQueueStore } from '../stores/queueStore';
+import { useTicketStore } from '../stores/ticketStore';
+import { useEventsStore } from '../stores/eventsStore';
+import { useNotifStore } from '../stores/notifStore';
+import { downloadOfficialTicketPdf } from '../services/pdfTicketService';
 import SvgIcon from './SvgIcon.vue';
 
 const authStore = useAuthStore();
 const queueStore = useQueueStore();
+const ticketStore = useTicketStore();
+const eventsStore = useEventsStore();
+const notifStore = useNotifStore();
+
+const downloadingOrderId = ref(null);
+
+async function handleDownloadTicketPdf(ticketItem) {
+  if (downloadingOrderId.value) return;
+  downloadingOrderId.value = ticketItem.orderId;
+
+  try {
+    const matchedEvent = eventsStore.events.find(e => e.title === ticketItem.eventTitle) || eventsStore.selectedEvent;
+    const filename = await downloadOfficialTicketPdf({
+      ticket: {
+        orderId: ticketItem.orderId,
+        seatNo: ticketItem.seatNo,
+        categoryName: ticketItem.categoryName,
+        holderName: authStore.currentUser?.name || 'Kevin Pratama',
+        totalPaid: ticketItem.totalPaid || 5500000,
+        issuedAt: ticketItem.issuedAt,
+        qty: ticketItem.qty || 1,
+      },
+      event: matchedEvent,
+      customer: authStore.currentUser,
+      formatMoney: ticketStore.formatMoney,
+    });
+
+    notifStore.push(
+      'success',
+      'E-Tiket PDF Diunduh',
+      `File ${filename} berhasil diunduh ke perangkat Anda.`
+    );
+  } catch (err) {
+    console.error('Download ticket error:', err);
+    notifStore.push('error', 'Gagal Mengunduh PDF', err.message || 'Terjadi kesalahan sistem.');
+  } finally {
+    downloadingOrderId.value = null;
+  }
+}
 </script>
 
 <template>
@@ -86,13 +130,29 @@ const queueStore = useQueueStore();
 
           <div class="flex items-center justify-between pt-1">
             <span class="text-[11px] text-slate-400">{{ t.issuedAt }}</span>
-            <button 
-              @click="authStore.isMyTicketsOpen = false; queueStore.setStage('ticket');"
-              class="text-xs text-navy dark:text-sky hover:text-coral dark:hover:text-coral font-bold flex items-center gap-1 underline underline-offset-2 cursor-pointer"
-            >
-              <span>Buka QR E-Tiket</span>
-              <SvgIcon name="arrow-right" className="w-3.5 h-3.5" />
-            </button>
+            
+            <div class="flex items-center gap-3">
+              <!-- Download PDF button -->
+              <button 
+                @click="handleDownloadTicketPdf(t)"
+                :disabled="downloadingOrderId === t.orderId"
+                class="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-bold flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                title="Download Official PDF Pass"
+              >
+                <SvgIcon v-if="downloadingOrderId !== t.orderId" name="download" className="w-3.5 h-3.5" />
+                <span v-else class="w-3.5 h-3.5 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></span>
+                <span>PDF</span>
+              </button>
+
+              <!-- View QR code -->
+              <button 
+                @click="authStore.isMyTicketsOpen = false; queueStore.setStage('ticket');"
+                class="text-xs text-navy dark:text-sky hover:text-coral dark:hover:text-coral font-bold flex items-center gap-1 underline underline-offset-2 cursor-pointer"
+              >
+                <span>Buka QR</span>
+                <SvgIcon name="arrow-right" className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

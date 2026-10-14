@@ -1,20 +1,26 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import QRCode from 'qrcode';
+import JsBarcode from 'jsbarcode';
 import { useTicketStore } from '../stores/ticketStore';
 import { useQueueStore } from '../stores/queueStore';
 import { useEventsStore } from '../stores/eventsStore';
 import { useAuthStore } from '../stores/authStore';
+import { useNotifStore } from '../stores/notifStore';
+import { downloadOfficialTicketPdf } from '../services/pdfTicketService';
 import SvgIcon from './SvgIcon.vue';
 
 const ticketStore = useTicketStore();
 const queueStore = useQueueStore();
 const eventsStore = useEventsStore();
 const authStore = useAuthStore();
+const notifStore = useNotifStore();
 
 const currentEvent = computed(() => eventsStore.selectedEvent);
 const qrDataUrl = ref('');
+const barcodeDataUrl = ref('');
 const isScanningModalOpen = ref(false);
+const isDownloadingPdf = ref(false);
 
 // Active ticket object with robust fallbacks
 const activeTicket = computed(() => {
@@ -64,12 +70,59 @@ async function generateRealQrCode() {
   }
 }
 
+function generateBarcode() {
+  try {
+    const canvas = document.createElement('canvas');
+    const cleanId = (activeTicket.value?.orderId || 'ORD98212026').replace(/[^A-Z0-9]/g, '');
+    const barcodeCode = `${cleanId}${Math.floor(1000 + Math.random() * 9000)}`;
+    JsBarcode(canvas, barcodeCode, {
+      format: 'CODE128',
+      lineColor: '#1e266d',
+      width: 1.8,
+      height: 38,
+      displayValue: true,
+      font: 'monospace',
+      fontSize: 10,
+      textMargin: 2,
+      background: '#ffffff',
+    });
+    barcodeDataUrl.value = canvas.toDataURL('image/png');
+  } catch (err) {
+    console.warn('Error generating Barcode:', err);
+  }
+}
+
+async function handleDownloadPdf() {
+  if (isDownloadingPdf.value) return;
+  isDownloadingPdf.value = true;
+  try {
+    const filename = await downloadOfficialTicketPdf({
+      ticket: activeTicket.value,
+      event: currentEvent.value,
+      customer: ticketStore.customer,
+      formatMoney: ticketStore.formatMoney,
+    });
+    notifStore.push(
+      'success',
+      'E-Tiket PDF Berhasil Diunduh!',
+      `File resmi ${filename} telah tersimpan di perangkat Anda lengkap dengan QR Code, Barcode Code-128, dan watermark keaslian.`
+    );
+  } catch (err) {
+    console.error('Download PDF error:', err);
+    notifStore.push('error', 'Gagal Mengunduh PDF', err.message || 'Terjadi kesalahan saat memproses tiket.');
+  } finally {
+    isDownloadingPdf.value = false;
+  }
+}
+
 onMounted(() => {
   generateRealQrCode();
+  generateBarcode();
 });
 
 watch(() => [ticketStore.issuedTicket, activeTicket.value], () => {
   generateRealQrCode();
+  generateBarcode();
 }, { deep: true });
 
 function handlePrint() { window.print(); }
@@ -88,22 +141,30 @@ function handleBackHome() {
         <SvgIcon name="check" className="w-8 h-8 sm:w-9 sm:h-9 text-mint dark:text-emerald-400" />
       </div>
       <h2 class="text-xl sm:text-2xl font-extrabold text-navy dark:text-white">Pembayaran Sukses &amp; E-Tiket Resmi Terbit!</h2>
-      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-        Tiket Anda telah terdaftar resmi di sistem. Simpan QR Code di bawah untuk akses masuk gerbang acara.
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+        Tiket konser Anda telah terdaftar resmi di sistem. Unduh PDF tiket resmi atau gunakan QR Code di bawah untuk masuk ke arena konser.
       </p>
     </div>
 
-    <!-- E-Ticket Card -->
-    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-elevated border border-slate-100 dark:border-slate-800 overflow-hidden print:shadow-none print:border-none transition-colors">
+    <!-- E-Ticket Card (Realistic Concert Pass Design) -->
+    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-elevated border border-slate-200 dark:border-slate-800 overflow-hidden print:shadow-none print:border-none transition-colors relative">
+      
+      <!-- Watermark Anti-Pemalsuan Background Overlay -->
+      <div class="absolute inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05] overflow-hidden flex items-center justify-center select-none">
+        <div class="text-[44px] font-black rotate-[-25deg] tracking-widest text-slate-900 dark:text-white uppercase">
+          FLASHTIKET OFFICIAL AUTHENTIC PASS
+        </div>
+      </div>
+
       <!-- Header Strip -->
-      <div class="bg-navy dark:bg-slate-950 px-5 sm:px-6 py-4 flex items-center justify-between text-white border-b border-navy/20 dark:border-slate-800">
+      <div class="bg-navy dark:bg-slate-950 px-5 sm:px-6 py-4 flex items-center justify-between text-white border-b border-navy/20 dark:border-slate-800 relative z-10">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center">
             <SvgIcon name="bolt" className="w-5 h-5 text-white" />
           </div>
           <div>
             <div class="text-white font-bold text-xs sm:text-sm tracking-wide">FLASHTIKET OFFICIAL PASS</div>
-            <div class="text-white/70 text-[10px] font-mono">100% SCANNABLE REAL QR CODE</div>
+            <div class="text-white/70 text-[10px] font-mono">100% SCANNABLE REAL QR CODE &amp; BARCODE</div>
           </div>
         </div>
         <div class="text-right">
@@ -113,7 +174,7 @@ function handleBackHome() {
       </div>
 
       <!-- Ticket Body -->
-      <div class="p-5 sm:p-8 grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
+      <div class="p-5 sm:p-8 grid grid-cols-1 sm:grid-cols-3 gap-6 items-center relative z-10">
         <!-- Event Details (2 cols) -->
         <div class="sm:col-span-2 space-y-4">
           <div>
@@ -154,6 +215,21 @@ function handleBackHome() {
               <div class="font-bold text-navy dark:text-sky font-mono text-sm sm:text-base">
                 {{ ticketStore.formatMoney(activeTicket.totalPaid) }}
               </div>
+            </div>
+          </div>
+
+          <!-- Code-128 Barcode Display -->
+          <div v-if="barcodeDataUrl" class="pt-1 flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 border border-slate-100 dark:border-slate-700">
+            <div class="space-y-0.5">
+              <div class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Gate Barcode (Code-128)</div>
+              <img :src="barcodeDataUrl" alt="Barcode Code-128" class="h-9 max-w-full object-contain filter dark:invert" />
+            </div>
+            <div class="text-right space-y-0.5">
+              <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                <SvgIcon name="check" className="w-3 h-3" />
+                <span>Anti-Oversell OK</span>
+              </div>
+              <div class="text-[10px] font-mono text-slate-400">{{ activeTicket.issuedAt }}</div>
             </div>
           </div>
         </div>
@@ -215,20 +291,40 @@ function handleBackHome() {
 
     <!-- Actions (Responsive) -->
     <div class="flex flex-wrap items-center justify-center gap-3 print:hidden">
-      <button @click="handlePrint()"
-        class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-navy dark:bg-sky text-white font-bold text-xs sm:text-sm shadow-soft hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer">
-        <SvgIcon name="print" className="w-4 h-4" />
-        <span>Cetak / Unduh PDF</span>
+      <!-- 1. Tombol Download E-Ticket (PDF) Resmi -->
+      <button 
+        @click="handleDownloadPdf" 
+        :disabled="isDownloadingPdf"
+        class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+      >
+        <SvgIcon v-if="!isDownloadingPdf" name="download" className="w-4 h-4 text-white" />
+        <span v-else class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+        <span>{{ isDownloadingPdf ? 'Membuat PDF Tiket...' : 'Download E-Ticket (PDF)' }}</span>
       </button>
 
-      <button @click="authStore.isMyTicketsOpen = true"
-        class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/50 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
+      <!-- 2. Cetak Dokumen -->
+      <button 
+        @click="handlePrint()"
+        class="w-full sm:w-auto px-5 py-3 rounded-xl bg-navy dark:bg-sky text-white font-bold text-xs sm:text-sm shadow-soft hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <SvgIcon name="print" className="w-4 h-4" />
+        <span>Cetak Langsung</span>
+      </button>
+
+      <!-- 3. Tiket Saya -->
+      <button 
+        @click="authStore.isMyTicketsOpen = true"
+        class="w-full sm:w-auto px-5 py-3 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/50 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+      >
         <SvgIcon name="ticket" className="w-4 h-4 text-purple-600 dark:text-purple-400" />
         <span>Buka di Tiket Saya</span>
       </button>
 
-      <button @click="handleBackHome()"
-        class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 border border-slate-200/50 dark:border-slate-700 cursor-pointer">
+      <!-- 4. Beranda -->
+      <button 
+        @click="handleBackHome()"
+        class="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 border border-slate-200/50 dark:border-slate-700 cursor-pointer"
+      >
         <SvgIcon name="grid" className="w-4 h-4" />
         <span>Kembali ke Beranda</span>
       </button>
