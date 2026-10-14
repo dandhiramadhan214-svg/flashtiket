@@ -396,6 +396,21 @@ function handleCancel() {
           </div>
         </div>
 
+        <!-- Interactive Bank Simulation CTA Button (Instant Access) -->
+        <div class="space-y-2 pt-1">
+          <button
+            @click="handleSimulatePayment()"
+            :disabled="isVerifyingTransfer"
+            class="btn-mono-primary w-full py-4 text-xs font-bold text-center cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span v-if="isVerifyingTransfer">⏳ Memeriksa Mutasi Bank di Sistem Real-Time...</span>
+            <span v-else>⚡ Simulasikan Transfer m-Banking Selesai (Verifikasi Bayar) →</span>
+          </button>
+          <div class="text-[10px] text-[#525252] text-center">
+            Sistem mendengarkan mutasi bank secara real-time. Klik tombol di atas untuk menyelesaikan pesanan.
+          </div>
+        </div>
+
         <!-- Transfer Instructions -->
         <div class="border border-black p-4 space-y-2 bg-[#FAFAFA]">
           <div class="font-bold text-[11px] uppercase border-b border-[#E5E5E5] pb-1">
@@ -410,24 +425,10 @@ function handleCancel() {
           </ol>
         </div>
 
-        <!-- Interactive Bank Simulation CTA Button -->
-        <div class="space-y-3 pt-2">
-          <div class="text-[10px] text-[#525252] text-center">
-            Sistem mendengarkan mutasi bank secara real-time. Klik tombol di bawah untuk simulasi:
-          </div>
-
-          <button
-            @click="handleSimulatePayment()"
-            :disabled="isVerifyingTransfer"
-            class="btn-mono-primary w-full py-4 text-xs font-bold text-center cursor-pointer flex items-center justify-center gap-2"
-          >
-            <span v-if="isVerifyingTransfer">⏳ Memeriksa Mutasi Bank di Sistem Real-Time...</span>
-            <span v-else>⚡ Simulasikan Transfer m-Banking Selesai (Verifikasi Bayar) →</span>
-          </button>
-
+        <div class="text-center">
           <button 
             @click="isPaymentModalOpen = false" 
-            class="w-full text-center text-[10px] text-[#525252] hover:text-black uppercase underline cursor-pointer"
+            class="text-[10px] text-[#525252] hover:text-black uppercase underline cursor-pointer"
           >
             Tutup &amp; Pilih Saluran Lain
           </button>
