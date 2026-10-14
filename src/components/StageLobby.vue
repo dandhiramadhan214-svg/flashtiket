@@ -43,9 +43,6 @@ const tierCategories = computed(() => [
     desc: ticketStore.categoryDetails.vip.sub, 
     price: ticketStore.prices.vip, 
     fee: ticketStore.bookingFees.vip, 
-    color: 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800/40', 
-    accent: 'text-purple-600 dark:text-purple-400', 
-    dot: 'bg-purple-500' 
   },
   { 
     key: 'cat1', 
@@ -53,9 +50,6 @@ const tierCategories = computed(() => [
     desc: ticketStore.categoryDetails.cat1.sub, 
     price: ticketStore.prices.cat1, 
     fee: ticketStore.bookingFees.cat1, 
-    color: 'bg-sky-light dark:bg-sky-950/40 border-sky/30 dark:border-sky-800/40', 
-    accent: 'text-sky dark:text-sky-400', 
-    dot: 'bg-sky' 
   },
   { 
     key: 'cat2', 
@@ -63,226 +57,153 @@ const tierCategories = computed(() => [
     desc: ticketStore.categoryDetails.cat2.sub, 
     price: ticketStore.prices.cat2, 
     fee: ticketStore.bookingFees.cat2, 
-    color: 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700', 
-    accent: 'text-slate-600 dark:text-slate-300', 
-    dot: 'bg-slate-400' 
   },
 ]);
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
+  <div class="max-w-6xl mx-auto px-6 md:px-8 py-8 space-y-12">
 
     <!-- Top Navigation / Back Link -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between border-b-2 border-black pb-4">
       <button 
         @click="queueStore.setStage('home')"
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-navy dark:hover:text-sky hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm transition-all cursor-pointer"
+        class="font-mono text-xs uppercase tracking-wider text-black hover:underline cursor-pointer flex items-center gap-2"
       >
-        <SvgIcon name="arrow-left" className="w-3.5 h-3.5" />
-        <span>Kembali ke Semua Event</span>
+        <span>← Kembali ke Katalog Acara</span>
       </button>
 
-      <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700">
-        Kategori: {{ currentEvent.category }}
+      <span class="font-mono text-[11px] uppercase tracking-widest text-[#525252]">
+        KATEGORI: [{{ currentEvent.category }}]
       </span>
     </div>
 
-    <!-- Hero Event Card -->
-    <div class="relative rounded-3xl overflow-hidden shadow-elevated">
-      <div 
-        v-if="currentEvent.image"
-        class="absolute inset-0 bg-cover bg-center" 
-        :style="{ backgroundImage: `url('${currentEvent.image}')` }"
-      ></div>
-      <div 
-        v-else
-        class="absolute inset-0 bg-gradient-to-br from-navy via-indigo-950 to-slate-900"
-      ></div>
-      
-      <div class="absolute inset-0 bg-gradient-to-r from-navy/95 via-navy/80 to-navy/40 dark:from-slate-950/95 dark:via-slate-950/80 dark:to-slate-950/50"></div>
-
-      <div class="relative p-6 sm:p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 sm:gap-8">
-        <div class="text-white max-w-xl space-y-3">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="px-3 py-1 rounded-full bg-white/20 text-xs font-semibold tracking-wide backdrop-blur-md">
-              Waiting Room Open
-            </span>
-            <span class="px-3 py-1 rounded-full bg-mint/20 text-mint text-xs font-bold tracking-wide">
-              Official Ticket Drop
-            </span>
+    <!-- Hero Event Details Card (Editorial Print Style) -->
+    <div class="border-2 border-black bg-white p-8 sm:p-10 space-y-6">
+      <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-8">
+        <div class="space-y-4 max-w-2xl">
+          <div class="font-mono text-xs uppercase tracking-widest text-[#525252]">
+            RUANG TUNGGU PRA-PENJUALAN RESMI
           </div>
-
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
+          <h1 class="text-3xl sm:text-5xl font-serif font-black tracking-tight leading-tight text-black">
             {{ currentEvent.title }}
           </h1>
-          <p class="text-white/70 text-xs sm:text-sm font-medium">
+          <p class="font-body text-base text-[#525252] leading-relaxed">
             {{ currentEvent.subtitle }}
           </p>
 
-          <div class="flex flex-wrap gap-4 mt-2 text-xs sm:text-sm text-white/80">
-            <div class="flex items-center gap-1.5">
-              <SvgIcon name="calendar" className="w-4 h-4 text-coral" />
-              <span>{{ currentEvent.date }} · {{ currentEvent.time }}</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <SvgIcon name="location" className="w-4 h-4 text-sky" />
-              <span>{{ currentEvent.venue }}, {{ currentEvent.city }}</span>
-            </div>
+          <div class="pt-4 border-t border-black font-mono text-xs space-y-1">
+            <div class="text-[#525252] text-[10px] uppercase">Jadwal &amp; Lokasi:</div>
+            <div class="font-bold text-black">{{ currentEvent.date }} · {{ currentEvent.time }}</div>
+            <div class="text-[#525252]">{{ currentEvent.venue }}, {{ currentEvent.city }}</div>
           </div>
         </div>
 
-        <!-- Live Traffic Counter Card -->
-        <div class="bg-white/10 backdrop-blur-xl rounded-2xl p-5 min-w-[220px] sm:min-w-[240px] border border-white/20">
-          <div class="flex items-center gap-2 mb-1.5">
-            <span class="w-2 h-2 rounded-full bg-mint animate-pulse"></span>
-            <span class="text-[11px] font-semibold text-white/80 tracking-wide uppercase">Live Antrean</span>
-          </div>
-          <div class="text-2xl sm:text-3xl font-extrabold text-white font-mono">
+        <!-- Live Traffic Inverted Counter Box -->
+        <div class="bg-black text-white p-6 border-2 border-black min-w-[240px] text-center font-mono uppercase space-y-2">
+          <div class="text-[10px] tracking-widest text-white/70">Peminat di Waiting Room</div>
+          <div class="text-4xl sm:text-5xl font-serif font-black text-white">
             {{ queueStore.totalWaiting.toLocaleString('id-ID') }}
           </div>
-          <span class="text-xs text-white/60">fans di waiting room</span>
+          <div class="text-[10px] text-white/60">Antrean Siap Mengalir</div>
         </div>
       </div>
     </div>
 
-    <!-- Sold-Out Card -->
-    <div v-if="currentEvent.status === 'sold-out'" class="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl p-6 sm:p-8 text-center space-y-4 shadow-card">
-      <div class="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto">
-        <SvgIcon name="cancel" className="w-7 h-7 text-rose-600 dark:text-rose-400" />
-      </div>
-      <h2 class="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-white">Tiket Telah Habis Terjual (Sold Out)</h2>
-      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-lg mx-auto leading-relaxed">
-        Seluruh alokasi tiket resmi untuk event ini telah habis dipesan penonton. Silakan pantau pengumuman resmi promotor untuk info rilis tiket tambahan.
-      </p>
-      <button
-        @click="queueStore.setStage('home')"
-        class="px-6 py-3 rounded-xl bg-navy dark:bg-sky text-white font-bold text-xs sm:text-sm hover:bg-navy-light dark:hover:brightness-110 shadow-soft transition-all cursor-pointer"
-      >
-        Jelajahi Event Lainnya
-      </button>
-    </div>
-
-    <!-- Ended Event Card -->
-    <div v-else-if="currentEvent.status === 'ended'" class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 text-center space-y-4 shadow-card">
-      <div class="w-14 h-14 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center mx-auto">
-        <SvgIcon name="calendar" className="w-7 h-7 text-slate-500 dark:text-slate-400" />
-      </div>
-      <h2 class="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-white">Acara Telah Selesai Diselenggarakan</h2>
-      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-lg mx-auto leading-relaxed">
-        Event ini telah selesai berlangsung pada {{ currentEvent.date }}. Penjualan tiket resmi telah ditutup.
-      </p>
-      <button
-        @click="queueStore.setStage('home')"
-        class="px-6 py-3 rounded-xl bg-navy dark:bg-sky text-white font-bold text-xs sm:text-sm hover:bg-navy-light dark:hover:brightness-110 shadow-soft transition-all cursor-pointer"
-      >
-        Kembali ke Katalog Event
-      </button>
-    </div>
-
-    <!-- Countdown Timer Card (Active On-Sale / Coming-Soon) -->
-    <div v-else class="bg-white dark:bg-slate-900 rounded-2xl shadow-card p-6 sm:p-8 text-center space-y-5 border border-slate-100 dark:border-slate-800 transition-colors">
-      <div class="flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-coral">
-        <SvgIcon name="alarm" className="w-4 h-4 text-coral" />
-        <span>Ticket Drop Countdown</span>
+    <!-- Countdown Timer Section -->
+    <div class="border-4 border-black p-8 sm:p-12 text-center space-y-6 bg-white">
+      <div class="font-mono text-xs uppercase tracking-widest text-[#525252]">
+        [HITUNG MUNDUR BUKA PENJUALAN TIKET]
       </div>
 
-      <div class="text-5xl sm:text-7xl font-extrabold text-navy dark:text-sky font-mono tracking-tight">
-        {{ formatCountdown() }}<span class="text-2xl sm:text-3xl text-slate-300 dark:text-slate-600">.{{ String(msFraction).padStart(2, '0') }}</span>
+      <div class="text-6xl sm:text-8xl font-serif font-black text-black tracking-tight leading-none">
+        {{ formatCountdown() }}<span class="text-3xl sm:text-4xl font-mono text-[#525252]">.{{ String(msFraction).padStart(2, '0') }}</span>
       </div>
 
-      <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
-        Pintu antrean akan dibuka secara acak &amp; adil. Sistem Fair Play menjamin kesempatan sama untuk semua akun.
+      <p class="font-body text-xs sm:text-sm text-[#525252] max-w-lg mx-auto leading-relaxed">
+        Pintu antrean virtual dibuka tepat waktu. Setiap pengunjung mendapatkan giliran adil berdasar timestamp kedatangan milidetik di cluster Redis.
       </p>
 
-      <button
-        @click="queueStore.startQueue()"
-        class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-navy dark:bg-sky text-white font-bold text-sm tracking-wide shadow-soft hover:shadow-card-hover hover:bg-navy-light dark:hover:brightness-110 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
-      >
-        <span>Masuk Antrean Langsung</span>
-        <SvgIcon name="arrow-right" className="w-4 h-4" />
-      </button>
+      <div>
+        <button
+          @click="queueStore.startQueue()"
+          class="btn-mono-primary text-sm px-10 py-4"
+        >
+          <span>Masuk Ruang Antrean Sekarang →</span>
+        </button>
+      </div>
     </div>
 
-    <!-- Two Column: Rules + Readiness Check -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Two Column: Rules + Account Readiness -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
       <!-- Rules -->
-      <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-slate-100 dark:border-slate-800 p-5 sm:p-6 space-y-4 transition-colors">
-        <h2 class="text-base sm:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-          <SvgIcon name="shield" className="w-5 h-5 text-coral" />
-          Ketentuan &amp; Panduan Pembelian
+      <div class="md:col-span-7 border-2 border-black p-6 sm:p-8 space-y-6">
+        <h2 class="font-serif font-bold text-xl text-black">
+          Ketentuan Masuk Antrean
         </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="p-4 bg-coral-light dark:bg-rose-950/40 border border-coral/20 dark:border-rose-900/30 rounded-xl space-y-1.5">
-            <div class="w-6 h-6 rounded-lg bg-coral/10 text-coral flex items-center justify-center font-bold text-xs">1</div>
-            <h3 class="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-rose-200">Jangan Refresh</h3>
-            <p class="text-[11px] text-slate-500 dark:text-rose-300/80 leading-relaxed">Refresh browser akan mereset token sesi dan posisi antrean Anda.</p>
+        <div class="space-y-4 font-body text-xs text-[#525252]">
+          <div class="border-b border-black pb-3">
+            <span class="font-mono font-bold text-black uppercase block mb-1">01. DILARANG REFRESH HALAMAN</span>
+            Melakukan refresh peramban dapat membatalkan token antrean Anda dan mengembalikan posisi ke urutan paling belakang.
           </div>
-          <div class="p-4 bg-sky-light dark:bg-sky-950/40 border border-sky/20 dark:border-sky-900/30 rounded-xl space-y-1.5">
-            <div class="w-6 h-6 rounded-lg bg-sky/10 text-sky flex items-center justify-center font-bold text-xs">2</div>
-            <h3 class="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-sky-200">Fair Queue</h3>
-            <p class="text-[11px] text-slate-500 dark:text-sky-300/80 leading-relaxed">Antrean diacak server menggunakan algoritma ZSET Redis.</p>
+          <div class="border-b border-black pb-3">
+            <span class="font-mono font-bold text-black uppercase block mb-1">02. PEMBATASAN KUOTA MAKSIMAL</span>
+            Setiap akun dibatasi maksimal 2 tiket per transaksi guna mencegah tindakan penimbunan tiket oleh calo.
           </div>
-          <div class="p-4 bg-mint-light dark:bg-emerald-950/40 border border-mint/20 dark:border-emerald-900/30 rounded-xl space-y-1.5">
-            <div class="w-6 h-6 rounded-lg bg-mint/10 text-mint flex items-center justify-center font-bold text-xs">3</div>
-            <h3 class="text-xs sm:text-[13px] font-bold text-slate-700 dark:text-emerald-200">Waktu 10 Menit</h3>
-            <p class="text-[11px] text-slate-500 dark:text-emerald-300/80 leading-relaxed">Setelah giliran tiba, Anda punya waktu 10 menit untuk bayar.</p>
+          <div>
+            <span class="font-mono font-bold text-black uppercase block mb-1">03. BATAS WAKTU TRANSAKSI 10 MENIT</span>
+            Saat nomor antrean Anda tiba, sistem mengunci kursi selama 10 menit (600 detik) untuk menyelesaikan konfirmasi pembayaran.
           </div>
         </div>
       </div>
 
       <!-- Readiness Check -->
-      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-slate-100 dark:border-slate-800 p-5 sm:p-6 space-y-4 transition-colors">
-        <div class="flex items-center justify-between">
-          <h2 class="text-sm sm:text-base font-bold text-slate-800 dark:text-white">Status Kesiapan Akun</h2>
-          <span class="px-2 py-0.5 rounded-full bg-mint-light dark:bg-emerald-950/40 text-mint dark:text-emerald-400 text-[11px] font-bold">4/4 Siap</span>
+      <div class="md:col-span-5 border-2 border-black p-6 sm:p-8 space-y-6">
+        <div class="flex items-center justify-between border-b border-black pb-3">
+          <h2 class="font-serif font-bold text-lg text-black">Verifikasi Akun</h2>
+          <span class="font-mono text-xs font-bold">[4/4 LENGKAP]</span>
         </div>
-        <div class="space-y-2">
-          <div v-for="item in ['Akun Terverifikasi', 'Identitas Terisi (NIK)', 'Sesi Browser Aktif', 'Virtual Account Siap']" :key="item"
-            class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl text-xs sm:text-[13px]">
-            <div class="flex items-center gap-2">
-              <SvgIcon name="check" className="w-4 h-4 text-mint shrink-0" />
-              <span class="text-slate-600 dark:text-slate-300 font-medium">{{ item }}</span>
-            </div>
-            <span class="text-mint text-[11px] font-bold">OK</span>
+        <div class="space-y-3 font-mono text-xs uppercase">
+          <div v-for="item in ['Akun Terverifikasi', 'Nomor KTP/NIK Valid', 'Koneksi Browser Stabil', 'Virtual Account Siap']" :key="item"
+            class="flex items-center justify-between p-3 border border-black bg-white">
+            <span>{{ item }}</span>
+            <span class="font-bold">✓ READY</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Seat Tiers Preview -->
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-slate-100 dark:border-slate-800 p-5 sm:p-6 space-y-4 transition-colors">
-      <div class="flex items-center justify-between">
-        <h2 class="text-base sm:text-lg font-bold text-slate-800 dark:text-white">Kategori Tiket &amp; Estimasi Harga</h2>
-        <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">{{ ticketStore.currentCurrency }}</span>
+    <div class="border-2 border-black p-6 sm:p-8 space-y-6">
+      <div class="flex items-center justify-between border-b-2 border-black pb-4">
+        <h2 class="font-serif font-bold text-2xl text-black">Kategori Kursi &amp; Tarif Resmi</h2>
+        <span class="font-mono text-xs uppercase text-[#525252]">DENAH GBK STADIUM</span>
       </div>
-      <div class="space-y-3">
-        <div v-for="cat in tierCategories" :key="cat.key"
-          class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border transition-colors"
-          :class="cat.color"
+
+      <div class="space-y-4">
+        <div 
+          v-for="cat in tierCategories" 
+          :key="cat.key"
+          class="border-2 border-black p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors card-mono-hover"
         >
-          <div class="flex items-center gap-3">
-            <div class="w-2.5 h-2.5 rounded-full shrink-0" :class="cat.dot"></div>
-            <div>
-              <h3 class="font-bold text-xs sm:text-sm text-slate-700 dark:text-slate-200">{{ cat.label }}</h3>
-              <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">{{ cat.desc }}</p>
-            </div>
+          <div class="space-y-1">
+            <div class="font-mono text-[10px] uppercase tracking-widest opacity-70">KATEGORI TIKET</div>
+            <h3 class="font-serif font-bold text-xl">{{ cat.label }}</h3>
+            <p class="font-body text-xs opacity-80 max-w-xl">{{ cat.desc }}</p>
           </div>
-          <div class="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pt-2 sm:pt-0 border-t sm:border-0 border-slate-200/50 dark:border-slate-700">
-            <div class="text-left sm:text-right">
-              <span class="font-bold font-mono text-base sm:text-lg" :class="cat.accent">
-                {{ ticketStore.formatMoney(cat.price) }}
-              </span>
-              <span class="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 block">+ {{ ticketStore.formatMoney(cat.fee) }} fee</span>
+
+          <div class="text-left md:text-right pt-4 md:pt-0 border-t md:border-t-0 border-current font-mono">
+            <div class="text-xl font-bold">
+              {{ ticketStore.formatMoney(cat.price) }}
             </div>
-            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold"
-              :class="ticketStore.stock[cat.key] > 0 ? 'bg-mint-light dark:bg-emerald-950/40 text-mint dark:text-emerald-400' : 'bg-coral-light dark:bg-rose-950/40 text-coral dark:text-rose-400'"
-            >
-              {{ ticketStore.stock[cat.key] > 0 ? 'Tersedia' : 'Habis' }}
-            </span>
+            <div class="text-[10px] opacity-70">+ {{ ticketStore.formatMoney(cat.fee) }} Booking Fee</div>
+            <div class="mt-2 inline-block px-2 py-0.5 border border-current text-[10px] font-bold uppercase">
+              {{ ticketStore.stock[cat.key] > 0 ? 'KUOTA TERSEDIA' : 'HABIS' }}
+            </div>
           </div>
         </div>
       </div>
     </div>
+
   </div>
 </template>

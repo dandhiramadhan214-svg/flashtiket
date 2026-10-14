@@ -11,7 +11,6 @@ const eventsStore = useEventsStore();
 
 const currentEvent = computed(() => eventsStore.selectedEvent);
 
-// Selected seat tracking
 const selectedSeat = ref({
   id: 'VIP-A08',
   category: 'vip',
@@ -21,11 +20,10 @@ const selectedSeat = ref({
 
 const hoveredSeat = ref(null);
 
-// Generate VIP Seat dots (4 rows x 14 seats)
+// VIP Seat dots (4 rows x 14 seats)
 const vipSeats = computed(() => {
   const list = [];
   const rows = ['A', 'B', 'C', 'D'];
-  // Pre-determined booked seats for realism
   const bookedIndices = [2, 5, 8, 12, 17, 21, 28, 33, 40, 47];
 
   for (let r = 0; r < rows.length; r++) {
@@ -51,7 +49,7 @@ const vipSeats = computed(() => {
   return list;
 });
 
-// Generate CAT 2 Tribune Left seats (Curved Sector)
+// CAT 2 Tribune Left seats
 const tribuneLeftSeats = computed(() => {
   const list = [];
   const rows = 4;
@@ -75,7 +73,7 @@ const tribuneLeftSeats = computed(() => {
   return list;
 });
 
-// Generate CAT 2 Tribune Right seats (Curved Sector)
+// CAT 2 Tribune Right seats
 const tribuneRightSeats = computed(() => {
   const list = [];
   const rows = 4;
@@ -99,7 +97,7 @@ const tribuneRightSeats = computed(() => {
   return list;
 });
 
-// Generate CAT 2 Tribune Upper/Back Grandstand seats (Arch curves)
+// CAT 2 Tribune Back
 const tribuneBackSeats = computed(() => {
   const list = [];
   const rows = 3;
@@ -123,7 +121,6 @@ const tribuneBackSeats = computed(() => {
   return list;
 });
 
-// Handle Seat Click
 function selectIndividualSeat(seat) {
   if (seat.isBooked) return;
 
@@ -138,7 +135,6 @@ function selectIndividualSeat(seat) {
   ticketStore.setSelectedSeat(selectedSeat.value.name, selectedSeat.value.zone, seat.category);
 }
 
-// Handle Zone click (e.g. Festival CAT 1 Standing)
 function selectCategoryZone(catKey) {
   ticketStore.selectCategory(catKey);
   if (catKey === 'cat1') {
@@ -178,139 +174,103 @@ function handleLock() {
 }
 
 const cats = [
-  { key: 'vip', label: 'VIP Royal Soundcheck', desc: 'Kursi berpenomoran barisan depan + soundcheck pass.', dot: 'bg-purple-500', ring: 'ring-purple-300 dark:ring-purple-500/50', bg: 'bg-purple-50 dark:bg-purple-950/40' },
-  { key: 'cat1', label: 'CAT 1 Standing Festival', desc: 'Area festival berdiri di depan panggung & catwalk.', dot: 'bg-sky', ring: 'ring-sky/40 dark:ring-sky/50', bg: 'bg-sky-light dark:bg-sky-950/40' },
-  { key: 'cat2', label: 'CAT 2 Reserved Seating', desc: 'Tribun grandstand bernomor pandangan panoramik.', dot: 'bg-slate-400', ring: 'ring-slate-300 dark:ring-slate-600', bg: 'bg-slate-50 dark:bg-slate-800' },
+  { key: 'vip', label: 'VIP Royal Soundcheck', desc: 'Kursi berpenomoran barisan depan + soundcheck pass.' },
+  { key: 'cat1', label: 'CAT 1 Standing Festival', desc: 'Area festival berdiri di depan panggung & catwalk.' },
+  { key: 'cat2', label: 'CAT 2 Reserved Seating', desc: 'Tribun grandstand bernomor pandangan panoramik.' },
 ];
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+  <div class="max-w-6xl mx-auto px-6 md:px-8 py-8 space-y-8">
 
     <!-- Header bar with event title & countdown badge -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b-2 border-black pb-4">
       <div>
-        <div class="text-xs font-semibold text-coral flex items-center gap-1.5">
-          <SvgIcon name="fire" className="w-3.5 h-3.5 text-coral" />
-          <span>{{ currentEvent.title }}</span>
+        <div class="font-mono text-xs uppercase tracking-widest text-[#525252]">
+          {{ currentEvent.title }} · DENAH ARSITEKTURAL
         </div>
-        <h2 class="text-xl sm:text-2xl font-extrabold text-navy dark:text-white tracking-tight">Peta Stadion &amp; Pemilihan Kursi</h2>
+        <h2 class="text-3xl sm:text-4xl font-serif font-black tracking-tight text-black">
+          Peta Stadion &amp; Pemilihan Kursi
+        </h2>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-mono text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5">
-          <SvgIcon name="clock" className="w-3.5 h-3.5 text-slate-400" />
-          Sesi Kunci Kursi: 15m
+      <div class="font-mono text-xs uppercase">
+        <span class="border border-black px-3 py-1 text-black">
+          Sesi Reservasi: 10 Menit (600s)
         </span>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      <!-- Left: Interactive Realistic Stadium Map (7 Cols) -->
-      <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl shadow-card border border-slate-100 dark:border-slate-800 p-4 sm:p-5 space-y-4 transition-colors">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Left: Interactive CAD Stadium Map (7 Cols) -->
+      <div class="lg:col-span-7 border-2 border-black p-6 space-y-4 bg-white">
         
-        <!-- Stadium Header Info & Seat Selected Pin -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-black pb-3 font-mono text-xs">
           <div>
-            <h3 class="font-bold text-slate-800 dark:text-white text-sm flex items-center gap-1.5">
-              <SvgIcon name="stadium" className="w-4 h-4 text-navy dark:text-sky" />
-              <span>{{ currentEvent.venue }} — Denah Interaktif</span>
-            </h3>
-            <p class="text-[11px] text-slate-400 dark:text-slate-500">Klik titik kursi untuk memilih nomor kursi impian Anda</p>
+            <div class="font-bold text-black uppercase">{{ currentEvent.venue }}</div>
+            <div class="text-[10px] text-[#525252]">Pilih titik kursi pada peta untuk menentukan alokasi</div>
           </div>
 
-          <!-- Dynamic Active Seat Chip -->
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-navy dark:text-sky">
-            <span class="w-2.5 h-2.5 rounded-full bg-mint animate-pulse"></span>
-            <span>Kursi Terpilih: <strong>{{ selectedSeat.name }}</strong></span>
+          <div class="bg-black text-white px-3 py-1 font-bold text-[11px] uppercase border border-black">
+            KURSI: {{ selectedSeat.name }}
           </div>
         </div>
 
-        <!-- SVG Arena Map with Dots -->
-        <div class="w-full aspect-[4/3] bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950 rounded-2xl relative overflow-hidden shadow-inner border border-slate-800 flex items-center justify-center">
+        <!-- SVG Arena Map (Architectural Blueprint CAD) -->
+        <div class="w-full aspect-[4/3] bg-black border-2 border-black relative overflow-hidden flex items-center justify-center">
           
           <svg viewBox="0 0 720 490" class="w-full h-full select-none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Stadium Outer Wall Arc / Atmosphere Glow -->
-            <ellipse cx="360" cy="280" rx="340" ry="200" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.4" />
-            <ellipse cx="360" cy="275" rx="310" ry="180" fill="none" stroke="#475569" stroke-width="1" opacity="0.25" />
+            <!-- Stadium Boundary Hairline Lines -->
+            <ellipse cx="360" cy="280" rx="340" ry="200" fill="none" stroke="#525252" stroke-width="1" stroke-dasharray="3 3" />
+            <ellipse cx="360" cy="275" rx="310" ry="180" fill="none" stroke="#333333" stroke-width="1" />
 
             <!-- Panggung Utama (MAIN STAGE) -->
             <g class="cursor-pointer" @click="selectCategoryZone('vip')">
-              <!-- Stage Glow & Rig -->
-              <rect x="230" y="20" width="260" height="52" rx="12" fill="#1e266d" stroke="#4f8cff" stroke-width="2" />
-              <text x="360" y="45" fill="#ffffff" font-size="13" font-family="Poppins, sans-serif" font-weight="800" text-anchor="middle" letter-spacing="2">
+              <rect x="230" y="20" width="260" height="52" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="2" />
+              <text x="360" y="45" fill="#000000" font-size="12" font-family="'JetBrains Mono', monospace" font-weight="800" text-anchor="middle" letter-spacing="2">
                 PANGGUNG UTAMA
               </text>
-              <text x="360" y="60" fill="#93c5fd" font-size="9" font-family="Poppins, sans-serif" font-weight="600" text-anchor="middle">
-                AUDIO RIGS &amp; LED WALL
+              <text x="360" y="60" fill="#000000" font-size="8" font-family="'JetBrains Mono', monospace" font-weight="600" text-anchor="middle">
+                MAIN PERFORMANCE STAGE
               </text>
 
               <!-- Runway / Catwalk -->
-              <rect x="338" y="72" width="44" height="65" rx="6" fill="#2d3a8c" stroke="#4f8cff" stroke-width="1.5" />
-              <!-- Thrust circular stage tip -->
-              <circle cx="360" cy="142" r="18" fill="#3730a3" stroke="#818cf8" stroke-width="2" />
-              <text x="360" y="145" fill="#ffffff" font-size="8" font-family="Poppins" font-weight="700" text-anchor="middle">THRUST</text>
+              <rect x="338" y="72" width="44" height="65" fill="#FFFFFF" stroke="#000000" stroke-width="1" />
+              <circle cx="360" cy="142" r="16" fill="#FFFFFF" stroke="#000000" stroke-width="1" />
+              <text x="360" y="145" fill="#000000" font-size="7" font-family="'JetBrains Mono', monospace" font-weight="700" text-anchor="middle">CATWALK</text>
             </g>
 
-            <!-- CAT 1 Standing Festival Pen Left & Right (Flanking Runway) -->
-            <g class="cursor-pointer transition-opacity hover:opacity-95" @click="selectCategoryZone('cat1')">
-              <!-- Left Festival Pen -->
-              <rect x="175" y="85" width="145" height="85" rx="12" 
-                :fill="ticketStore.selectedCategory === 'cat1' ? '#1e3a8a' : '#0f172a'" 
-                :stroke="ticketStore.selectedCategory === 'cat1' ? '#38bdf8' : '#1e293b'" 
-                stroke-width="1.5" />
+            <!-- CAT 1 Standing Festival Zone -->
+            <g class="cursor-pointer" @click="selectCategoryZone('cat1')">
+              <rect x="200" y="160" width="320" height="150" fill="none" 
+                :stroke="ticketStore.selectedCategory === 'cat1' ? '#FFFFFF' : '#525252'" 
+                :stroke-width="ticketStore.selectedCategory === 'cat1' ? 2 : 1" 
+                stroke-dasharray="4 4" />
               
-              <!-- Subtle Festival Standing Crowd Dots Grid -->
-              <g opacity="0.4" fill="#38bdf8">
-                <circle v-for="n in 36" :key="'cL-'+n" :cx="190 + (n % 6) * 22" :cy="100 + Math.floor(n / 6) * 11" r="1.5" />
-              </g>
-
-              <text x="247" y="128" fill="#38bdf8" font-size="10" font-family="Poppins" font-weight="700" text-anchor="middle">
-                CAT 1 STANDING (A)
+              <text x="360" y="240" 
+                :fill="ticketStore.selectedCategory === 'cat1' ? '#FFFFFF' : '#888888'" 
+                font-size="11" font-family="'JetBrains Mono', monospace" font-weight="700" text-anchor="middle" letter-spacing="1">
+                CAT 1: FESTIVAL STANDING AREA
               </text>
-              <text x="247" y="142" fill="#94a3b8" font-size="8" font-family="Poppins" text-anchor="middle">
-                Kuota: {{ ticketStore.stock.cat1 }}
-              </text>
-
-              <!-- Right Festival Pen -->
-              <rect x="400" y="85" width="145" height="85" rx="12" 
-                :fill="ticketStore.selectedCategory === 'cat1' ? '#1e3a8a' : '#0f172a'" 
-                :stroke="ticketStore.selectedCategory === 'cat1' ? '#38bdf8' : '#1e293b'" 
-                stroke-width="1.5" />
-              
-              <!-- Subtle Festival Standing Crowd Dots Grid -->
-              <g opacity="0.4" fill="#38bdf8">
-                <circle v-for="n in 36" :key="'cR-'+n" :cx="415 + (n % 6) * 22" :cy="100 + Math.floor(n / 6) * 11" r="1.5" />
-              </g>
-
-              <text x="472" y="128" fill="#38bdf8" font-size="10" font-family="Poppins" font-weight="700" text-anchor="middle">
-                CAT 1 STANDING (B)
-              </text>
-              <text x="472" y="142" fill="#94a3b8" font-size="8" font-family="Poppins" text-anchor="middle">
-                Bebas Berdiri Depan Stage
+              <text x="360" y="255" fill="#666666" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle">
+                Free Standing · Direct Stage Proximity
               </text>
             </g>
 
-            <!-- VIP Royal Floor (Container Box + Dot Grid) -->
+            <!-- VIP Floor Seats -->
             <g>
-              <rect x="210" y="178" width="300" height="106" rx="14" 
-                :fill="ticketStore.selectedCategory === 'vip' ? 'rgba(88, 28, 135, 0.4)' : 'rgba(30, 27, 75, 0.3)'" 
-                :stroke="ticketStore.selectedCategory === 'vip' ? '#c084fc' : '#475569'" 
-                stroke-width="1.5" />
-
-              <text x="360" y="193" fill="#d8b4fe" font-size="9" font-family="Poppins" font-weight="700" text-anchor="middle" letter-spacing="1">
-                VIP ROYAL SEATING (BARIS A - D)
+              <text x="360" y="185" fill="#FFFFFF" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="700" text-anchor="middle">
+                VIP ROYAL FLOOR (SEATED)
               </text>
 
-              <!-- VIP Individual Seat Dots -->
               <g v-for="seat in vipSeats" :key="seat.id">
                 <circle
                   :cx="seat.x"
                   :cy="seat.y"
-                  :r="seat.isSelected ? 6.5 : (hoveredSeat === seat.id ? 5.5 : 4.5)"
-                  :fill="seat.isBooked ? '#475569' : (seat.isSelected ? '#00c48c' : (ticketStore.selectedCategory === 'vip' ? '#c084fc' : '#a855f7'))"
-                  :stroke="seat.isSelected ? '#ffffff' : (seat.isBooked ? '#334155' : (hoveredSeat === seat.id ? '#ffffff' : '#e9d5ff'))"
-                  :stroke-width="seat.isSelected ? 2.5 : (hoveredSeat === seat.id ? 2 : 1)"
-                  :class="seat.isBooked ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'"
+                  :r="seat.isSelected ? 5.5 : 3.5"
+                  :fill="seat.isBooked ? '#333333' : (seat.isSelected ? '#FFFFFF' : '#888888')"
+                  :stroke="seat.isSelected ? '#FFFFFF' : 'none'"
+                  :stroke-width="seat.isSelected ? 2 : 0"
+                  :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer'"
                   @mouseenter="!seat.isBooked && (hoveredSeat = seat.id)"
                   @mouseleave="hoveredSeat === seat.id && (hoveredSeat = null)"
                   @click="selectIndividualSeat(seat)"
@@ -318,21 +278,16 @@ const cats = [
               </g>
             </g>
 
-            <!-- Soundboard Mixer Booth (FOH) -->
-            <rect x="325" y="292" width="70" height="20" rx="4" fill="#0f172a" stroke="#64748b" stroke-width="1" />
-            <text x="360" y="305" fill="#94a3b8" font-size="8" font-family="Roboto Mono" font-weight="600" text-anchor="middle">FOH CONSOLE</text>
-
-            <!-- CAT 2 Tribune Left (West Wing Curved Seat Dots) -->
+            <!-- CAT 2 Tribune Left -->
             <g>
-              <text x="110" y="152" fill="#94a3b8" font-size="8" font-family="Poppins" font-weight="700" text-anchor="middle">TRIBUN BARAT</text>
+              <text x="95" y="145" fill="#888888" font-size="8" font-family="'JetBrains Mono', monospace" font-weight="700">TRIBUN BARAT</text>
               <g v-for="seat in tribuneLeftSeats" :key="seat.id">
                 <circle
                   :cx="seat.x"
                   :cy="seat.y"
-                  :r="seat.isSelected ? 6 : (hoveredSeat === seat.id ? 5 : 3.8)"
-                  :fill="seat.isBooked ? '#334155' : (seat.isSelected ? '#00c48c' : (ticketStore.selectedCategory === 'cat2' ? '#60a5fa' : '#94a3b8'))"
-                  :stroke="seat.isSelected || hoveredSeat === seat.id ? '#ffffff' : 'none'"
-                  :stroke-width="seat.isSelected ? 2 : 1"
+                  :r="seat.isSelected ? 5.5 : 3.5"
+                  :fill="seat.isBooked ? '#333333' : (seat.isSelected ? '#FFFFFF' : '#666666')"
+                  :stroke="seat.isSelected ? '#FFFFFF' : 'none'"
                   :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer'"
                   @mouseenter="!seat.isBooked && (hoveredSeat = seat.id)"
                   @mouseleave="hoveredSeat === seat.id && (hoveredSeat = null)"
@@ -341,17 +296,16 @@ const cats = [
               </g>
             </g>
 
-            <!-- CAT 2 Tribune Right (East Wing Curved Seat Dots) -->
+            <!-- CAT 2 Tribune Right -->
             <g>
-              <text x="610" y="152" fill="#94a3b8" font-size="8" font-family="Poppins" font-weight="700" text-anchor="middle">TRIBUN TIMUR</text>
+              <text x="590" y="145" fill="#888888" font-size="8" font-family="'JetBrains Mono', monospace" font-weight="700">TRIBUN TIMUR</text>
               <g v-for="seat in tribuneRightSeats" :key="seat.id">
                 <circle
                   :cx="seat.x"
                   :cy="seat.y"
-                  :r="seat.isSelected ? 6 : (hoveredSeat === seat.id ? 5 : 3.8)"
-                  :fill="seat.isBooked ? '#334155' : (seat.isSelected ? '#00c48c' : (ticketStore.selectedCategory === 'cat2' ? '#60a5fa' : '#94a3b8'))"
-                  :stroke="seat.isSelected || hoveredSeat === seat.id ? '#ffffff' : 'none'"
-                  :stroke-width="seat.isSelected ? 2 : 1"
+                  :r="seat.isSelected ? 5.5 : 3.5"
+                  :fill="seat.isBooked ? '#333333' : (seat.isSelected ? '#FFFFFF' : '#666666')"
+                  :stroke="seat.isSelected ? '#FFFFFF' : 'none'"
                   :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer'"
                   @mouseenter="!seat.isBooked && (hoveredSeat = seat.id)"
                   @mouseleave="hoveredSeat === seat.id && (hoveredSeat = null)"
@@ -360,26 +314,20 @@ const cats = [
               </g>
             </g>
 
-            <!-- CAT 2 Tribune Back (Upper Grandstand Dots Array) -->
+            <!-- CAT 2 Tribune Back -->
             <g>
-              <rect x="140" y="325" width="440" height="90" rx="14" 
-                :fill="ticketStore.selectedCategory === 'cat2' ? 'rgba(30, 58, 138, 0.25)' : 'rgba(15, 23, 42, 0.4)'" 
-                :stroke="ticketStore.selectedCategory === 'cat2' ? '#60a5fa' : '#334155'" 
-                stroke-width="1.2" />
-
-              <text x="360" y="342" fill="#94a3b8" font-size="9" font-family="Poppins" font-weight="700" text-anchor="middle">
-                TRIBUN UTAMA GRANDSTAND (BARIS 1 - 3)
+              <rect x="140" y="325" width="440" height="90" fill="none" stroke="#444444" stroke-width="1" />
+              <text x="360" y="342" fill="#888888" font-size="8" font-family="'JetBrains Mono', monospace" font-weight="700" text-anchor="middle">
+                TRIBUN UTAMA GRANDSTAND
               </text>
 
-              <!-- Grandstand Dots -->
               <g v-for="seat in tribuneBackSeats" :key="seat.id">
                 <circle
                   :cx="seat.x"
                   :cy="seat.y"
-                  :r="seat.isSelected ? 6 : (hoveredSeat === seat.id ? 5 : 3.8)"
-                  :fill="seat.isBooked ? '#334155' : (seat.isSelected ? '#00c48c' : (ticketStore.selectedCategory === 'cat2' ? '#60a5fa' : '#94a3b8'))"
-                  :stroke="seat.isSelected || hoveredSeat === seat.id ? '#ffffff' : 'none'"
-                  :stroke-width="seat.isSelected ? 2 : 1"
+                  :r="seat.isSelected ? 5.5 : 3.5"
+                  :fill="seat.isBooked ? '#333333' : (seat.isSelected ? '#FFFFFF' : '#666666')"
+                  :stroke="seat.isSelected ? '#FFFFFF' : 'none'"
                   :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer'"
                   @mouseenter="!seat.isBooked && (hoveredSeat = seat.id)"
                   @mouseleave="hoveredSeat === seat.id && (hoveredSeat = null)"
@@ -388,125 +336,113 @@ const cats = [
               </g>
             </g>
 
-            <!-- Floating Hover Tooltip (Inside SVG) -->
+            <!-- Floating Hover Tooltip -->
             <g v-if="hoveredSeat" pointer-events="none">
-              <rect x="270" y="440" width="180" height="36" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1" />
-              <text x="360" y="458" fill="#ffffff" font-size="10" font-family="Poppins" font-weight="700" text-anchor="middle">
-                {{ hoveredSeat }}
-              </text>
-              <text x="360" y="469" fill="#00c48c" font-size="8" font-family="Poppins" text-anchor="middle">
-                Klik untuk memilih kursi ini
+              <rect x="270" y="440" width="180" height="32" fill="#000000" stroke="#FFFFFF" stroke-width="1" />
+              <text x="360" y="460" fill="#FFFFFF" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="700" text-anchor="middle">
+                {{ hoveredSeat }} (Klik untuk memilih)
               </text>
             </g>
           </svg>
         </div>
 
-        <!-- Realistic Seat Status Legend -->
-        <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-xs text-slate-600 dark:text-slate-300 font-medium pt-2 border-t border-slate-100 dark:border-slate-800">
-          <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-mint ring-2 ring-mint/30"></span>
-            <span class="font-bold text-slate-700 dark:text-white">Kursi Terpilih</span>
+        <!-- Legend Bar (Sharp Monochrome) -->
+        <div class="flex flex-wrap items-center justify-center gap-6 font-mono text-[11px] text-[#525252] pt-2 border-t border-black uppercase">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 bg-white border border-black"></span>
+            <span class="text-black font-bold">Terpilih</span>
           </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-purple-500"></span>
-            <span>VIP Soundcheck</span>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 bg-black"></span>
+            <span>Tersedia</span>
           </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-sky"></span>
-            <span>CAT 1 Festival</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-slate-400"></span>
-            <span>CAT 2 Tribune</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-3 h-3 rounded-full bg-slate-700 opacity-60"></span>
-            <span class="text-slate-400 dark:text-slate-500">Terisi / Habis</span>
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 bg-[#333333]"></span>
+            <span>Terisi / Booked</span>
           </div>
         </div>
       </div>
 
       <!-- Right: Category Cards + Qty + Lock CTA (5 Cols) -->
-      <div class="lg:col-span-5 space-y-4">
+      <div class="lg:col-span-5 space-y-6">
         
         <!-- Category Selector Cards -->
-        <div v-for="cat in cats" :key="cat.key"
-          @click="selectCategoryZone(cat.key)"
-          class="p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200"
-          :class="ticketStore.selectedCategory === cat.key
-            ? `${cat.bg} ${cat.ring} ring-2 shadow-card-hover border-transparent`
-            : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 shadow-card'"
-        >
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="w-3 h-3 rounded-full shrink-0" :class="cat.dot"></span>
-              <span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-white">{{ cat.label }}</span>
+        <div class="space-y-3 font-mono">
+          <div v-for="cat in cats" :key="cat.key"
+            @click="selectCategoryZone(cat.key)"
+            class="border-2 p-5 cursor-pointer transition-all duration-100"
+            :class="ticketStore.selectedCategory === cat.key
+              ? 'bg-black text-white border-black'
+              : 'bg-white text-black border-black hover:border-4'"
+          >
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-[10px] uppercase opacity-70">KATEGORI</div>
+                <div class="font-bold text-sm uppercase">{{ cat.label }}</div>
+              </div>
+              <div class="text-right">
+                <div class="text-base font-bold">
+                  {{ ticketStore.formatMoney(ticketStore.prices[cat.key]) }}
+                </div>
+              </div>
             </div>
-            <span class="font-bold font-mono text-navy dark:text-sky text-sm sm:text-base">
-              {{ ticketStore.formatMoney(ticketStore.prices[cat.key]) }}
-            </span>
-          </div>
 
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 ml-5 leading-relaxed">{{ cat.desc }}</p>
+            <p class="font-body text-xs opacity-80 mt-2">{{ cat.desc }}</p>
 
-          <div class="flex items-center justify-between mt-2.5 ml-5 text-[11px] font-mono text-slate-400 dark:text-slate-500 border-t border-slate-100 dark:border-slate-800 pt-1.5">
-            <span>Sisa Kuota: {{ ticketStore.stock[cat.key] }}</span>
-            <span :class="ticketStore.stock[cat.key] > 0 ? 'text-mint font-bold' : 'text-coral font-bold'">
-              {{ ticketStore.stock[cat.key] > 0 ? '● Siap Dipesan' : '● Habis' }}
-            </span>
+            <div class="flex items-center justify-between mt-3 text-[10px] border-t border-current pt-2 uppercase">
+              <span>Sisa Kuota: {{ ticketStore.stock[cat.key] }}</span>
+              <span class="font-bold">
+                {{ ticketStore.stock[cat.key] > 0 ? '[Siap Kunci]' : '[Habis]' }}
+              </span>
+            </div>
           </div>
         </div>
 
         <!-- Selected Seat Detail & Quantity Box -->
-        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-slate-100 dark:border-slate-800 p-5 space-y-4 transition-colors">
+        <div class="border-2 border-black p-6 space-y-4 bg-white font-mono">
           
-          <!-- Seat Assigned Preview -->
-          <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between">
+          <div class="border border-black p-3 flex items-center justify-between text-xs uppercase">
             <div>
-              <div class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold uppercase">
-                {{ selectedSeat.category === 'cat1' ? 'Area Masuk' : (ticketStore.quantity === 2 ? 'Nomor Kursi (2 Kursi Berdampingan)' : 'Nomor Kursi Terpilih') }}
-              </div>
-              <div class="text-sm font-extrabold text-navy dark:text-sky font-mono">
-                {{ selectedSeat.category === 'cat1' ? 'Festival Standing Entry' : (ticketStore.quantity === 2 ? `${selectedSeat.name} & Berdampingan` : selectedSeat.name) }}
-              </div>
-              <div class="text-[10px] text-slate-500 dark:text-slate-400">{{ selectedSeat.zone }}</div>
+              <div class="text-[10px] text-[#525252]">Alokasi Kursi:</div>
+              <div class="font-bold text-black">{{ selectedSeat.name }}</div>
+              <div class="text-[10px] text-[#525252]">{{ selectedSeat.zone }}</div>
             </div>
-            <span class="px-2.5 py-1 rounded-full bg-mint-light dark:bg-emerald-950/40 text-mint dark:text-emerald-400 text-[11px] font-bold">
-              {{ ticketStore.quantity === 2 ? '2 Kursi Terpilih' : 'Terkonfirmasi' }}
+            <span class="border border-black px-2 py-0.5 text-[10px] font-bold">
+              TERKONFIRMASI
             </span>
           </div>
 
           <!-- Quantity Selector -->
-          <div class="flex items-center justify-between pt-1">
+          <div class="flex items-center justify-between pt-2">
             <div>
-              <div class="font-bold text-xs sm:text-sm text-slate-700 dark:text-slate-200">Jumlah Tiket</div>
-              <div class="text-[11px] text-slate-400 dark:text-slate-500">Maks. 2 tiket per transaksi</div>
+              <div class="font-bold text-xs uppercase">Jumlah Tiket</div>
+              <div class="text-[10px] text-[#525252]">Maks. 2 tiket per transaksi</div>
             </div>
-            <div class="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 rounded-xl p-1">
+            <div class="flex items-center border border-black">
               <button 
                 @click="ticketStore.decrementQty()" 
-                class="w-8 h-8 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+                class="w-8 h-8 flex items-center justify-center font-bold text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
               >-</button>
-              <span class="font-bold text-base sm:text-lg font-mono w-6 text-center text-navy dark:text-sky">{{ ticketStore.quantity }}</span>
+              <span class="font-bold text-sm w-8 text-center">{{ ticketStore.quantity }}</span>
               <button 
                 @click="ticketStore.incrementQty()" 
-                class="w-8 h-8 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+                class="w-8 h-8 flex items-center justify-center font-bold text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
               >+</button>
             </div>
           </div>
 
           <!-- Price Calculations -->
-          <div class="border-t border-slate-100 dark:border-slate-800 pt-3 space-y-1.5 text-xs sm:text-[13px] font-mono">
-            <div class="flex justify-between text-slate-500 dark:text-slate-400">
-              <span>Harga Tiket</span>
-              <span class="text-slate-700 dark:text-slate-300">{{ ticketStore.formatMoney(ticketStore.unitPrice) }} × {{ ticketStore.quantity }}</span>
+          <div class="border-t border-black pt-3 space-y-1.5 text-xs">
+            <div class="flex justify-between text-[#525252]">
+              <span>Tarif Tiket:</span>
+              <span class="text-black">{{ ticketStore.formatMoney(ticketStore.unitPrice) }} × {{ ticketStore.quantity }}</span>
             </div>
-            <div class="flex justify-between text-slate-500 dark:text-slate-400">
-              <span>Biaya Layanan</span>
-              <span class="text-slate-700 dark:text-slate-300">{{ ticketStore.formatMoney(ticketStore.bookingFee * ticketStore.quantity) }}</span>
+            <div class="flex justify-between text-[#525252]">
+              <span>Booking Fee:</span>
+              <span class="text-black">{{ ticketStore.formatMoney(ticketStore.bookingFee * ticketStore.quantity) }}</span>
             </div>
-            <div class="flex justify-between font-bold text-navy dark:text-sky text-sm sm:text-base pt-2 border-t border-slate-100 dark:border-slate-800 mt-1">
-              <span>Estimasi Subtotal</span>
+            <div class="flex justify-between font-bold text-black text-sm pt-2 border-t border-black mt-2">
+              <span>Subtotal:</span>
               <span>{{ ticketStore.formatMoney(ticketStore.subtotal) }}</span>
             </div>
           </div>
@@ -514,10 +450,9 @@ const cats = [
           <!-- Lock Button CTA -->
           <button
             @click="handleLock()"
-            class="w-full py-3.5 rounded-xl bg-navy dark:bg-sky text-white font-bold text-sm tracking-wide shadow-soft hover:bg-navy-light dark:hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            class="btn-mono-primary w-full py-4 text-center text-xs"
           >
-            <SvgIcon name="lock" className="w-4 h-4 text-white" />
-            <span>Kunci Kursi &amp; Lanjut Bayar</span>
+            <span>Kunci Kursi &amp; Lanjut Bayar →</span>
           </button>
         </div>
       </div>

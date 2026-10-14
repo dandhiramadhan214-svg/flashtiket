@@ -17,7 +17,6 @@ const reviewStore = useReviewStore();
 
 function handleEventClick(event) {
   if (event.status === 'ended') {
-    // Open review modal for ended event
     reviewStore.openReviewModal(event);
     return;
   }
@@ -26,7 +25,7 @@ function handleEventClick(event) {
     return;
   }
   if (event.status === 'coming-soon') {
-    notifStore.push('info', 'Segera Dibuka', `Tiket "${event.title}" akan segera dibuka! Pantau jadwal berkala.`);
+    notifStore.push('info', 'Segera Dibuka', `Tiket "${event.title}" akan segera dibuka.`);
     return;
   }
   eventsStore.selectEvent(event.id);
@@ -39,9 +38,9 @@ function toggleWishlist(e, event) {
   const already = wishlistStore.isWishlisted(event.id);
   wishlistStore.toggle(event.id);
   if (already) {
-    notifStore.push('info', 'Dihapus dari Wishlist', `"${event.title}" dihapus dari favorit.`);
+    notifStore.push('info', 'Wishlist', `"${event.title}" dihapus dari favorit.`);
   } else {
-    notifStore.push('success', 'Ditambahkan ke Wishlist', `"${event.title}" berhasil disimpan ke favorit!`);
+    notifStore.push('success', 'Wishlist', `"${event.title}" disimpan ke favorit.`);
   }
 }
 
@@ -51,364 +50,317 @@ const bannerEvent = computed(() => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+  <div class="max-w-6xl mx-auto px-6 md:px-8 py-8 space-y-16">
     
+    <!-- ═══════════════ 1. OVERSIZED HERO STATEMENT ═══════════════ -->
+    <section class="pt-6 pb-12 border-b-4 border-black">
+      <div class="flex items-center justify-between font-mono text-[11px] uppercase tracking-widest text-[#525252] mb-6 border-b border-black pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 bg-black inline-block"></span>
+          <span>FLASHTIKET ARCHITECTURAL ENGINE</span>
+        </div>
+        <div class="hidden sm:block">
+          ZERO-TOLERANCE OVERSELLING · HIGH CONCURRENCY
+        </div>
+      </div>
 
+      <!-- Oversized Hero Headlines (8xl / 9xl) -->
+      <h1 class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-serif font-black tracking-tighter leading-none text-black uppercase">
+        PRESISI.<br/>
+        <span class="italic font-normal">SATU DETIK.</span>
+      </h1>
 
-    <!-- Featured Hero Banner (Yesplis Style) -->
-    <div 
-      @click="handleEventClick(bannerEvent)"
-      class="group relative rounded-3xl overflow-hidden shadow-elevated cursor-pointer bg-slate-900 transition-all duration-300 hover:shadow-2xl"
-    >
-      <!-- Background Image / Gradient -->
-      <div 
-        class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-        :style="{ backgroundImage: bannerEvent.image ? `url('${bannerEvent.image}')` : 'none' }"
-      ></div>
-      <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-navy/70 to-black/30"></div>
-
-      <!-- Banner Content -->
-      <div class="relative p-6 sm:p-10 lg:p-12 min-h-[340px] sm:min-h-[400px] flex flex-col justify-end text-white">
-        <div class="flex flex-wrap items-center gap-2 mb-3">
-          <span class="px-3 py-1 rounded-full bg-coral text-white text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5">
-            <SvgIcon name="fire" className="w-3.5 h-3.5" />
-            Trending Event
-          </span>
-          <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-medium text-white">
-            {{ bannerEvent.category }}
-          </span>
-          <span class="px-3 py-1 rounded-full bg-mint/30 backdrop-blur-md text-mint text-xs font-bold">
-            Tiket Tersedia
-          </span>
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
+        <div class="md:col-span-8">
+          <p class="drop-cap font-body text-base md:text-lg text-[#525252] leading-relaxed max-w-2xl">
+            Sistem pemesanan tiket konser dengan teknologi antrean terdistribusi. Ditenagai oleh evaluasi atomik script Lua di RAM Redis v7 dan penguncian kursi TTL 600 detik, menjamin kepastian alokasi kuota tanpa risiko kelebihan jual dalam lonjakan ribuan pengunjung serentak.
+          </p>
         </div>
 
-        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-2 leading-tight text-white drop-shadow-sm">
-          {{ bannerEvent.title }}
-        </h1>
-        <p class="text-sm sm:text-base text-slate-200 font-medium max-w-2xl mb-4">
-          {{ bannerEvent.subtitle }}
-        </p>
+        <div class="md:col-span-4 flex flex-col sm:flex-row md:flex-col gap-3 font-mono text-xs uppercase">
+          <button 
+            @click="handleEventClick(bannerEvent)"
+            class="btn-mono-primary w-full text-center"
+          >
+            <span>War Tiket Konser →</span>
+          </button>
+          <button 
+            @click="queueStore.isGuideModalOpen = true"
+            class="btn-mono-secondary w-full text-center"
+          >
+            <span>Protokol Antrean</span>
+          </button>
+        </div>
+      </div>
+    </section>
 
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-white/20">
-          <div class="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-slate-200">
-            <div class="flex items-center gap-1.5">
-              <SvgIcon name="calendar" className="w-4 h-4 text-coral" />
-              <span>{{ bannerEvent.date }} · {{ bannerEvent.time }}</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <SvgIcon name="location" className="w-4 h-4 text-sky" />
-              <span>{{ bannerEvent.venue }}, {{ bannerEvent.city }}</span>
+    <!-- ═══════════════ 2. FEATURED CONCERT EDITORIAL BANNER ═══════════════ -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between font-mono text-[11px] uppercase tracking-widest text-[#525252]">
+        <span>[01 / SOROTAN UTAMA]</span>
+        <span>STATUS: PENJUALAN DIBUKA</span>
+      </div>
+
+      <div 
+        @click="handleEventClick(bannerEvent)"
+        class="border-2 border-black bg-white cursor-pointer group transition-all duration-100"
+      >
+        <div class="grid grid-cols-1 lg:grid-cols-12">
+          <!-- Image Section (Grayscale by default, scales on hover) -->
+          <div class="lg:col-span-7 h-72 sm:h-96 lg:h-auto border-b-2 lg:border-b-0 lg:border-r-2 border-black relative overflow-hidden bg-black">
+            <div 
+              class="w-full h-full bg-cover bg-center grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-300"
+              :style="{ backgroundImage: bannerEvent.image ? `url('${bannerEvent.image}')` : 'none' }"
+            ></div>
+            <div class="absolute top-4 left-4 font-mono text-[10px] uppercase tracking-widest bg-black text-white px-3 py-1 border border-white">
+              POPULER / TRENDING
             </div>
           </div>
 
-          <div class="flex items-center gap-3">
-            <div class="text-right">
-              <div class="text-[11px] text-white/70">Mulai dari</div>
-              <div class="text-lg sm:text-xl font-extrabold text-white font-mono">
-                {{ eventsStore.formatPrice(bannerEvent.priceFrom, bannerEvent.currency) }}
+          <!-- Editorial Content Section -->
+          <div class="lg:col-span-5 p-8 sm:p-10 flex flex-col justify-between space-y-6">
+            <div class="space-y-4">
+              <div class="font-mono text-xs uppercase tracking-widest text-[#525252]">
+                {{ bannerEvent.category }} · {{ bannerEvent.city }}
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-serif font-bold text-black tracking-tight leading-tight">
+                {{ bannerEvent.title }}
+              </h2>
+              <p class="font-body text-sm text-[#525252] leading-relaxed">
+                {{ bannerEvent.subtitle }}
+              </p>
+            </div>
+
+            <div class="space-y-4 pt-4 border-t border-black">
+              <div class="font-mono text-xs space-y-1">
+                <div class="text-[#525252] text-[10px] uppercase">Waktu &amp; Lokasi:</div>
+                <div class="text-black font-semibold">{{ bannerEvent.date }} · {{ bannerEvent.time }}</div>
+                <div class="text-[#525252] truncate">{{ bannerEvent.venue }}, {{ bannerEvent.city }}</div>
+              </div>
+
+              <div class="flex items-center justify-between pt-2">
+                <div>
+                  <div class="font-mono text-[10px] uppercase text-[#525252]">Mulai Dari</div>
+                  <div class="font-mono text-xl font-bold text-black">
+                    {{ eventsStore.formatPrice(bannerEvent.priceFrom, bannerEvent.currency) }}
+                  </div>
+                </div>
+
+                <span class="btn-mono-primary text-xs px-5 py-3">
+                  Pesan Tiket →
+                </span>
               </div>
             </div>
-            <!-- High-contrast button that never vanishes on hover -->
-            <button 
-              class="px-5 py-2.5 rounded-xl bg-coral text-white font-bold text-xs sm:text-sm hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-lg shrink-0"
-            >
-              <span>Beli Tiket Sekarang</span>
-              <SvgIcon name="arrow-right" className="w-4 h-4 text-white" />
-            </button>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Search & Filter Bar Section (Yesplis Minimalist Design) -->
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-card border border-slate-100 dark:border-slate-800 p-4 sm:p-6 space-y-4 transition-colors">
-      
-      <!-- Search Input Box with SVG -->
-      <div class="relative">
-        <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-          <SvgIcon name="search" className="w-5 h-5 text-slate-400" />
-        </span>
-        <input 
-          v-model="eventsStore.searchQuery"
-          type="text"
-          placeholder="Cari konser, festival, artis, atau lokasi venue..."
-          class="w-full pl-12 pr-10 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-navy dark:focus:ring-sky focus:bg-white dark:focus:bg-slate-800 transition-all"
-        />
-        <button 
-          v-if="eventsStore.searchQuery"
-          @click="eventsStore.searchQuery = ''"
-          class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-        >
-          <SvgIcon name="cancel" className="w-5 h-5 text-slate-400" />
-        </button>
-      </div>
-
-      <!-- Horizontal Scrollable Category Filter Chips -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none -mx-2 px-2">
-        <button
-          v-for="cat in eventsStore.categories"
-          :key="cat"
-          @click="eventsStore.activeCategory = cat"
-          class="shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all whitespace-nowrap"
-          :class="eventsStore.activeCategory === cat
-            ? 'bg-navy dark:bg-sky text-white shadow-soft ring-2 ring-navy/20 dark:ring-sky/30'
-            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-navy dark:hover:text-sky'"
-        >
-          {{ cat }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Events Grid Section -->
-    <div class="space-y-4">
-      <!-- Section Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div>
-          <h2 class="text-xl sm:text-2xl font-extrabold text-navy dark:text-sky tracking-tight flex items-center gap-2">
-            <span>Daftar Event &amp; Tiket</span>
-            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-              {{ eventsStore.filteredEvents.length }} Acara
-            </span>
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Pilih event untuk masuk ke ruang tunggu dan amankan tiket Anda.</p>
+    <!-- ═══════════════ 3. INVERTED STATS SECTION (Required Bold Choice) ═══════════════ -->
+    <section class="bg-black text-white border-2 border-black p-8 sm:p-12 pattern-lines-inverted">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center font-mono uppercase">
+        <div class="space-y-2 border-r border-white/20 last:border-r-0">
+          <div class="text-4xl sm:text-5xl font-serif font-black tracking-tight text-white">0</div>
+          <div class="text-[11px] tracking-widest text-white/70">Overselling Toleransi</div>
         </div>
 
-        <div v-if="eventsStore.activeCategory !== 'Semua' || eventsStore.searchQuery" class="flex items-center gap-2">
+        <div class="space-y-2 border-r border-white/20 last:border-r-0">
+          <div class="text-4xl sm:text-5xl font-serif font-black tracking-tight text-white">&lt; 50ms</div>
+          <div class="text-[11px] tracking-widest text-white/70">Latensi Kunci Kuota</div>
+        </div>
+
+        <div class="space-y-2 border-r border-white/20 last:border-r-0">
+          <div class="text-4xl sm:text-5xl font-serif font-black tracking-tight text-white">600s</div>
+          <div class="text-[11px] tracking-widest text-white/70">Durasi TTL Lock</div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="text-4xl sm:text-5xl font-serif font-black tracking-tight text-white">100%</div>
+          <div class="text-[11px] tracking-widest text-white/70">Scannable QR &amp; PDF</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 4. SEARCH & FILTER (Stark Line Architecture) ═══════════════ -->
+    <section class="space-y-6 pt-4">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-2 border-black pb-4">
+        <div>
+          <div class="font-mono text-[11px] uppercase tracking-widest text-[#525252]">Katalog Konser</div>
+          <h2 class="text-3xl sm:text-4xl font-serif font-bold tracking-tight text-black">
+            Daftar Acara &amp; Tiket Resmi
+          </h2>
+        </div>
+
+        <div class="font-mono text-xs uppercase text-[#525252]">
+          Menampilkan [{{ eventsStore.filteredEvents.length }}] Acara Aktif
+        </div>
+      </div>
+
+      <!-- Search Input (Bottom Border Only as per Design System) -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+        <div class="md:col-span-8 relative">
+          <input 
+            v-model="eventsStore.searchQuery"
+            type="text"
+            placeholder="Cari berdasarkan nama artis, judul tur, atau venue..."
+            class="w-full py-3.5 bg-transparent border-b-2 border-black text-sm font-mono placeholder:italic placeholder:text-[#525252] focus:border-b-4 focus:outline-none transition-all"
+          />
           <button 
-            @click="eventsStore.activeCategory = 'Semua'; eventsStore.searchQuery = '';"
-            class="text-xs text-coral hover:underline font-semibold flex items-center gap-1.5"
+            v-if="eventsStore.searchQuery"
+            @click="eventsStore.searchQuery = ''"
+            class="absolute right-2 top-3 text-xs font-mono uppercase text-[#525252] hover:text-black cursor-pointer"
           >
-            <SvgIcon name="refresh" className="w-3.5 h-3.5" />
-            Reset Filter
+            [Bersihkan]
+          </button>
+        </div>
+
+        <!-- Category Horizontal Filter Tabs -->
+        <div class="md:col-span-4 flex items-center gap-1.5 overflow-x-auto pb-1 font-mono text-xs uppercase">
+          <button
+            v-for="cat in eventsStore.categories.slice(0, 4)"
+            :key="cat"
+            @click="eventsStore.activeCategory = cat"
+            class="px-3 py-1.5 border transition-all cursor-pointer whitespace-nowrap text-[11px]"
+            :class="eventsStore.activeCategory === cat ? 'bg-black text-white border-black' : 'border-black text-black hover:bg-black hover:text-white'"
+          >
+            {{ cat }}
           </button>
         </div>
       </div>
 
-      <!-- Empty State -->
-      <div v-if="eventsStore.filteredEvents.length === 0" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-12 text-center space-y-3">
-        <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
-          <SvgIcon name="calendar" className="w-8 h-8 text-slate-400" />
-        </div>
-        <h3 class="text-base font-bold text-slate-700 dark:text-slate-200">Tidak ada event yang ditemukan</h3>
-        <p class="text-xs text-slate-400 max-w-sm mx-auto">Coba gunakan kata kunci pencarian lain atau pilih kategori "Semua".</p>
+      <!-- Event Cards Grid -->
+      <div v-if="eventsStore.filteredEvents.length === 0" class="border-2 border-black p-12 text-center space-y-3 font-mono">
+        <div class="text-sm uppercase text-[#525252]">Tidak ada acara yang cocok dengan kriteria pencarian.</div>
         <button 
           @click="eventsStore.activeCategory = 'Semua'; eventsStore.searchQuery = '';"
-          class="px-4 py-2 rounded-xl bg-navy dark:bg-sky text-white text-xs font-bold hover:brightness-110"
+          class="btn-mono-secondary text-xs"
         >
-          Lihat Semua Event
+          Tampilkan Semua Acara
         </button>
       </div>
 
-      <!-- Responsive Grid: 1 col on mobile, 2 on tablet, 3 on laptop, 4 on desktop -->
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
         <div 
-          v-for="(event, idx) in eventsStore.filteredEvents" 
+          v-for="(event) in eventsStore.filteredEvents" 
           :key="event.id"
           @click="handleEventClick(event)"
-          class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-card hover:shadow-card-hover transition-all duration-300 flex flex-col overflow-hidden group cursor-pointer relative"
+          class="border-2 border-black bg-white flex flex-col justify-between group cursor-pointer transition-all duration-100 hover:border-4 relative"
           :class="{
-            'opacity-85': event.status === 'sold-out',
-            'opacity-85 grayscale-[30%]': event.status === 'ended'
+            'opacity-60': event.status === 'sold-out',
+            'opacity-70': event.status === 'ended'
           }"
         >
-          <!-- Card Image / Header Gradient -->
-          <div class="relative h-44 overflow-hidden bg-slate-100 dark:bg-slate-800">
-            <!-- If image exists use it, else sleek gradient -->
+          <!-- Card Image with Grayscale & Zoom on Hover -->
+          <div class="h-52 border-b-2 border-black overflow-hidden relative bg-black">
             <div 
-              v-if="event.image" 
-              class="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
-              :style="{ backgroundImage: `url('${event.image}')` }"
+              class="w-full h-full bg-cover bg-center grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-300"
+              :style="{ backgroundImage: event.image ? `url('${event.image}')` : 'none' }"
             ></div>
-            <div 
-              v-else 
-              class="w-full h-full bg-gradient-to-br flex items-center justify-center group-hover:scale-105 transition-transform duration-500"
-              :class="eventsStore.eventGradient(idx)"
+
+            <!-- Top Left Status Badge -->
+            <div class="absolute top-3 left-3 font-mono text-[10px] uppercase tracking-widest bg-black text-white px-2.5 py-1 border border-white">
+              {{ event.status === 'sold-out' ? 'HABIS' : (event.status === 'ended' ? 'SELESAI' : (event.hot ? 'POPULER' : 'TERSEDIA')) }}
+            </div>
+
+            <!-- Wishlist Heart Button -->
+            <button
+              type="button"
+              @click="toggleWishlist($event, event)"
+              class="absolute top-3 right-3 w-7 h-7 bg-white text-black border border-black flex items-center justify-center font-mono text-xs hover:bg-black hover:text-white transition-colors"
+              :title="wishlistStore.isWishlisted(event.id) ? 'Hapus' : 'Favorit'"
             >
-              <div class="text-center p-4">
-                <SvgIcon name="ticket" className="w-10 h-10 text-white/50 mx-auto mb-1" />
-                <span class="block text-white/90 text-xs font-bold uppercase tracking-wider">{{ event.category }}</span>
-              </div>
-            </div>
-
-            <!-- Visual Overlay Stamp for Sold-Out and Ended -->
-            <div 
-              v-if="event.status === 'sold-out'" 
-              class="absolute inset-0 bg-slate-950/45 backdrop-blur-[1px] flex items-center justify-center pointer-events-none"
-            >
-              <span class="px-3.5 py-1.5 rounded-full bg-rose-600/95 text-white text-xs font-black uppercase tracking-widest shadow-xl border border-white/30 backdrop-blur-md">
-                Tiket Habis
-              </span>
-            </div>
-
-            <div 
-              v-else-if="event.status === 'ended'" 
-              class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center pointer-events-none"
-            >
-              <div class="text-center space-y-1">
-                <span class="px-3.5 py-1.5 rounded-full bg-slate-800/95 text-slate-200 text-xs font-bold uppercase tracking-wider shadow-lg border border-slate-600 inline-block">
-                  Acara Selesai
-                </span>
-                <span class="inline-flex items-center justify-center gap-1 text-[11px] text-amber-300 font-semibold">
-                  <SvgIcon name="star" className="w-3 h-3 text-amber-400" />
-                  <span>Klik untuk lihat ulasan</span>
-                </span>
-              </div>
-            </div>
-
-            <!-- Badges Overlay (Top Bar: Status on Left, Category + Wishlist on Right) -->
-            <div class="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-              <span 
-                class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide backdrop-blur-md shadow-sm inline-flex items-center gap-1"
-                :class="{
-                  'bg-rose-600 text-white': event.status === 'sold-out',
-                  'bg-slate-700 text-slate-200': event.status === 'ended',
-                  'bg-amber text-white': event.status === 'coming-soon',
-                  'bg-coral text-white': event.status === 'on-sale' && event.hot,
-                  'bg-mint text-white': event.status === 'on-sale' && !event.hot,
-                }"
-              >
-                <SvgIcon v-if="event.status === 'on-sale' && event.hot" name="fire" className="w-3 h-3 text-white" />
-                <span>{{ event.status === 'sold-out' ? 'Tiket Habis' : (event.status === 'ended' ? 'Selesai' : (event.status === 'coming-soon' ? 'Segera' : (event.hot ? 'Populer' : 'Tersedia'))) }}</span>
-              </span>
-
-              <div class="flex items-center gap-1.5 pointer-events-auto">
-                <span 
-                  class="px-2.5 py-1 rounded-full text-[11px] font-semibold backdrop-blur-md shadow-sm"
-                  :class="eventsStore.categoryColor(event.category).bg + ' ' + eventsStore.categoryColor(event.category).text"
-                >
-                  {{ event.category }}
-                </span>
-
-                <!-- Wishlist Heart Button -->
-                <button
-                  type="button"
-                  @click="toggleWishlist($event, event)"
-                  class="w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 shadow-sm"
-                  :title="wishlistStore.isWishlisted(event.id) ? 'Hapus dari Wishlist' : 'Simpan ke Wishlist'"
-                >
-                  <SvgIcon 
-                    name="heart" 
-                    className="w-3.5 h-3.5 transition-colors"
-                    :class="wishlistStore.isWishlisted(event.id) ? 'text-coral fill-coral' : 'text-white'" 
-                  />
-                </button>
-              </div>
-            </div>
+              {{ wishlistStore.isWishlisted(event.id) ? '★' : '☆' }}
+            </button>
           </div>
 
           <!-- Card Body -->
-          <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-4">
-            
+          <div class="p-6 flex-1 flex flex-col justify-between space-y-6">
             <div class="space-y-2">
-              <!-- Date & Time & Rating if any -->
-              <div class="flex items-center justify-between text-xs font-semibold">
-                <div class="flex items-center gap-1.5 text-coral">
-                  <SvgIcon name="calendar" className="w-3.5 h-3.5 text-coral shrink-0" />
-                  <span>{{ event.date }} · {{ event.time }}</span>
-                </div>
-                
-                <!-- Rating pill if reviews exist -->
-                <div 
-                  v-if="reviewStore.getAverageRating(event.id)"
-                  class="flex items-center gap-1 text-[11px] font-bold text-amber px-1.5 py-0.5 rounded-md bg-amber/10"
-                >
-                  <SvgIcon name="star" className="w-3 h-3 text-amber" />
-                  <span>{{ reviewStore.getAverageRating(event.id) }}</span>
-                </div>
+              <div class="font-mono text-[10px] uppercase tracking-widest text-[#525252]">
+                {{ event.category }} · {{ event.city }}
               </div>
-
-              <!-- Title -->
-              <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 line-clamp-1 group-hover:text-navy dark:group-hover:text-sky transition-colors">
+              <h3 class="text-xl font-serif font-bold text-black tracking-tight leading-snug group-hover:underline">
                 {{ event.title }}
               </h3>
-
-              <!-- Venue -->
-              <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
-                <SvgIcon name="location" className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <span>{{ event.venue }}, {{ event.city }}</span>
-              </div>
+              <p class="font-body text-xs text-[#525252] line-clamp-2">
+                {{ event.subtitle }}
+              </p>
             </div>
 
-            <!-- Card Bottom Divider & Price -->
-            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-              <div>
-                <span class="text-[11px] text-slate-400 block">Harga Mulai</span>
-                <span class="text-sm sm:text-base font-extrabold text-navy dark:text-sky font-mono">
-                  {{ eventsStore.formatPrice(event.priceFrom, event.currency) }}
-                </span>
+            <div class="space-y-4 pt-4 border-t border-black">
+              <div class="font-mono text-xs space-y-1">
+                <div class="text-[#525252] text-[10px] uppercase">Jadwal:</div>
+                <div class="text-black font-semibold">{{ event.date }} · {{ event.time }}</div>
+                <div class="text-[#525252] text-[11px] truncate">{{ event.venue }}</div>
               </div>
 
-              <button 
-                :disabled="event.status === 'sold-out' || event.status === 'coming-soon'"
-                class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1"
-                :class="{
-                  'bg-navy dark:bg-sky text-white hover:brightness-110 shadow-soft': event.status === 'on-sale',
-                  'bg-rose-50 dark:bg-rose-950/40 text-rose-500 border border-rose-200 dark:border-rose-900 cursor-not-allowed': event.status === 'sold-out',
-                  'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700': event.status === 'ended',
-                  'bg-amber-light dark:bg-amber/10 text-amber border border-amber/30 cursor-not-allowed': event.status === 'coming-soon',
-                }"
-              >
-                <span>
-                  {{ event.status === 'sold-out' ? 'Tiket Habis' : (event.status === 'ended' ? 'Lihat Ulasan' : (event.status === 'coming-soon' ? 'Segera Hadir' : 'Beli Tiket')) }}
+              <div class="flex items-center justify-between pt-2">
+                <div>
+                  <div class="font-mono text-[10px] uppercase text-[#525252]">Mulai Dari</div>
+                  <div class="font-mono text-base font-bold text-black">
+                    {{ eventsStore.formatPrice(event.priceFrom, event.currency) }}
+                  </div>
+                </div>
+
+                <span 
+                  class="px-3.5 py-2 font-mono text-[11px] uppercase tracking-wider font-bold border-2 border-black transition-colors"
+                  :class="event.status === 'sold-out' ? 'bg-[#F5F5F5] text-[#525252] border-[#E5E5E5]' : 'bg-black text-white group-hover:bg-white group-hover:text-black'"
+                >
+                  {{ event.status === 'sold-out' ? 'Habis' : (event.status === 'ended' ? 'Ulasan' : 'Pesan →') }}
                 </span>
-                <SvgIcon v-if="event.status === 'on-sale'" name="arrow-right" className="w-3.5 h-3.5" />
-                <SvgIcon v-else-if="event.status === 'ended'" name="star" className="w-3.5 h-3.5 text-amber" />
-              </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Trust Badges Info Section -->
-    <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 p-6 sm:p-8 shadow-card transition-colors">
-      <div class="text-center max-w-xl mx-auto mb-6">
-        <h3 class="text-lg sm:text-xl font-bold text-navy dark:text-sky">Keamanan &amp; Kemudahan Pembelian Tiket</h3>
-        <p class="text-xs sm:text-sm text-slate-400 mt-1">Sistem transaksi terproteksi dengan enkripsi resmi dan jaminan keaslian tiket 100%.</p>
+    <!-- ═══════════════ 5. EDITORIAL ARCHITECTURAL PILLARS ═══════════════ -->
+    <section class="border-t-4 border-black pt-12 space-y-8">
+      <div class="text-center max-w-2xl mx-auto space-y-2">
+        <div class="font-mono text-[11px] uppercase tracking-widest text-[#525252]">ARSITEKTUR &amp; INTEGRITAS</div>
+        <h2 class="text-2xl sm:text-3xl font-serif font-bold text-black">
+          Prinsip Rekayasa Sistem Terdistribusi
+        </h2>
+        <p class="font-body text-xs text-[#525252]">
+          Dibangun khusus untuk meredam lonjakan trafik flash crowd tanpa kompromi konsistensi data.
+        </p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
-          <div class="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 flex items-center justify-center shrink-0">
-            <SvgIcon name="bolt" className="w-5 h-5 text-purple-600 dark:text-purple-300" />
-          </div>
-          <div>
-            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100">Virtual Waiting Room</h4>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Antrean acak fair play saat pintu tiket dibuka.</p>
-          </div>
+      <div class="grid grid-cols-1 md:grid-cols-4 border-2 border-black">
+        <div class="p-6 border-b md:border-b-0 md:border-r border-black space-y-3">
+          <div class="font-mono text-xs font-bold text-black">01 / ANTRIAN FIFO</div>
+          <h4 class="font-serif font-bold text-base text-black">Virtual Waiting Room</h4>
+          <p class="font-body text-xs text-[#525252] leading-relaxed">
+            Pengunjung diurutkan secara presisi menggunakan Redis Sorted Set (ZSET) berbasis timestamp milidetik.
+          </p>
         </div>
 
-        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
-          <div class="w-9 h-9 rounded-xl bg-sky-light dark:bg-sky/20 text-sky flex items-center justify-center shrink-0">
-            <SvgIcon name="clock" className="w-5 h-5 text-sky" />
-          </div>
-          <div>
-            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100">10-Min Temporary Lock</h4>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Kursi aman selama proses isi biodata &amp; bayar.</p>
-          </div>
+        <div class="p-6 border-b md:border-b-0 md:border-r border-black space-y-3">
+          <div class="font-mono text-xs font-bold text-black">02 / SIKLUS TUNGGAL</div>
+          <h4 class="font-serif font-bold text-base text-black">Atomic Lua Engine</h4>
+          <p class="font-body text-xs text-[#525252] leading-relaxed">
+            Verifikasi kuota dan pengurangan stok dieksekusi dalam satu siklus CPU di RAM Redis tanpa race-condition.
+          </p>
         </div>
 
-        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
-          <div class="w-9 h-9 rounded-xl bg-coral-light dark:bg-coral/20 text-coral flex items-center justify-center shrink-0">
-            <SvgIcon name="bot" className="w-5 h-5 text-coral" />
-          </div>
-          <div>
-            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100">Anti-Bot &amp; Anti-Scalper</h4>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Maksimal 2 tiket/akun untuk mencegah calo.</p>
-          </div>
+        <div class="p-6 border-b md:border-b-0 md:border-r border-black space-y-3">
+          <div class="font-mono text-xs font-bold text-black">03 / RESERVASI 10M</div>
+          <h4 class="font-serif font-bold text-base text-black">TTL Distributed Lock</h4>
+          <p class="font-body text-xs text-[#525252] leading-relaxed">
+            Kursi terkunci aman selama 600 detik. Jika pembayaran tidak tuntas, worker otomatis merestorasi kuota.
+          </p>
         </div>
 
-        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
-          <div class="w-9 h-9 rounded-xl bg-mint-light dark:bg-mint/20 text-mint flex items-center justify-center shrink-0">
-            <SvgIcon name="qr" className="w-5 h-5 text-mint" />
-          </div>
-          <div>
-            <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100">E-Tiket Real QR Code</h4>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">QR Code dinamis asli bisa dipindai kamera HP.</p>
-          </div>
+        <div class="p-6 space-y-3">
+          <div class="font-mono text-xs font-bold text-black">04 / FILTER GATEWAY</div>
+          <h4 class="font-serif font-bold text-base text-black">IP Rate Limiting</h4>
+          <p class="font-body text-xs text-[#525252] leading-relaxed">
+            Setiap IP dibatasi maksimal 5 request per detik oleh Nginx Reverse Proxy untuk meredam serangan bot calo.
+          </p>
         </div>
       </div>
-    </div>
+    </section>
 
   </div>
 </template>

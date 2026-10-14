@@ -4,7 +4,6 @@ import { useQueueStore } from '../stores/queueStore';
 import { useEventsStore } from '../stores/eventsStore';
 import { useAuthStore } from '../stores/authStore';
 import { useWishlistStore } from '../stores/wishlistStore';
-import { useThemeStore } from '../stores/themeStore';
 import { useAdminStore } from '../stores/adminStore';
 import SvgIcon from './SvgIcon.vue';
 
@@ -12,7 +11,6 @@ const queueStore = useQueueStore();
 const eventsStore = useEventsStore();
 const authStore = useAuthStore();
 const wishlistStore = useWishlistStore();
-const themeStore = useThemeStore();
 const adminStore = useAdminStore();
 
 const isUserMenuOpen = ref(false);
@@ -20,18 +18,6 @@ const isCategoryOpen = ref(false);
 const isMobileMenuOpen = ref(false);
 const isMobileCategoryExpanded = ref(false);
 
-// Color mapping for each category — consistent with eventsStore.categoryColor
-const categoryColorMap = {
-  'Semua':          { dot: '#64748b', bg: '#f1f5f9', ring: '#94a3b8' },
-  'Konser':         { dot: '#a855f7', bg: '#faf5ff', ring: '#c084fc' },
-  'Festival':       { dot: '#4f8cff', bg: '#e8f0ff', ring: '#93b8ff' },
-  'Olahraga':       { dot: '#00c48c', bg: '#e6faf3', ring: '#34d399' },
-  'Seni & Budaya':  { dot: '#ffb800', bg: '#fff8e6', ring: '#fcd34d' },
-  'Workshop':       { dot: '#ff5757', bg: '#fff0f0', ring: '#fca5a5' },
-  'Esports':        { dot: '#1e266d', bg: '#eef0ff', ring: '#6366f1' },
-};
-
-// Count events per category
 function countByCategory(cat) {
   if (cat === 'Semua') return eventsStore.events.length;
   return eventsStore.events.filter(e => e.category === cat).length;
@@ -59,7 +45,6 @@ function closeMobileMenu() {
   isMobileCategoryExpanded.value = false;
 }
 
-// Close dropdowns on outside click
 function handleOutsideClick(e) {
   if (!e.target.closest('.category-dropdown-wrapper')) {
     isCategoryOpen.value = false;
@@ -69,7 +54,6 @@ function handleOutsideClick(e) {
   }
 }
 
-// Lock body scroll when mobile menu is open
 watch(isMobileMenuOpen, (val) => {
   document.body.style.overflow = val ? 'hidden' : '';
 });
@@ -84,544 +68,289 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 transition-colors duration-200">
-    <!-- Top Utility Bar (Yesplis Style) -->
-    <div class="bg-navy dark:bg-slate-950 text-white text-[11px] font-medium py-1.5 px-4 hidden sm:block border-b dark:border-slate-800/60">
-      <div class="max-w-7xl mx-auto flex items-center justify-between">
+  <header class="sticky top-0 z-40 bg-white border-b-2 border-black">
+    <!-- Top Editorial Rule Bar -->
+    <div class="bg-black text-white text-[10px] font-mono tracking-widest py-1.5 px-4 hidden sm:block border-b border-black">
+      <div class="max-w-6xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <span class="flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-mint animate-pulse"></span>
-            Platform Resmi Tiket Konser &amp; Festival
+          <span class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-white"></span>
+            <span>OFFICIAL CONCERT PASS &amp; TICKET RESERVATION ENGINE</span>
           </span>
-          <span class="text-white/40">|</span>
-          <span class="text-white/80">Transaksi Cepat &amp; Aman 100%</span>
+          <span class="text-white/40">/</span>
+          <span class="text-white/80">HIGH CONCURRENCY · ZERO OVERSELLING</span>
         </div>
-        <div class="flex items-center gap-4">
-          <a href="#" class="text-white/80 hover:text-white transition-colors">Bantuan &amp; FAQ</a>
-          <span class="text-white/40">|</span>
-          <span class="text-mint font-semibold">Bahasa Indonesia (ID)</span>
+        <div class="flex items-center gap-4 uppercase">
+          <span class="text-white/70">EDITION 2026</span>
+          <span class="text-white/40">/</span>
+          <span class="text-white font-bold">JAKARTA — ASIA</span>
         </div>
       </div>
     </div>
 
-    <!-- Main Clean Navigation Bar -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-3">
+    <!-- Main Navigation Bar -->
+    <div class="max-w-6xl mx-auto px-6 md:px-8 h-16 flex items-center justify-between gap-4">
       
-      <!-- Brand Logo (Always links to Beranda) -->
-      <div class="flex items-center gap-2.5 sm:gap-3 shrink-0 cursor-pointer select-none" @click="goHome">
-        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-navy dark:bg-sky flex items-center justify-center shadow-soft hover:bg-navy-light transition-colors text-white">
-          <SvgIcon name="bolt" className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+      <!-- Brand Logo (Editorial Serif) -->
+      <div class="flex items-center gap-3 cursor-pointer select-none group" @click="goHome">
+        <div class="w-9 h-9 bg-black text-white flex items-center justify-center font-serif font-black text-base border-2 border-black group-hover:bg-white group-hover:text-black transition-colors">
+          F
         </div>
         <div>
-          <span class="text-base sm:text-lg font-extrabold text-navy dark:text-sky tracking-tight block leading-tight">FlashTiket</span>
-          <span class="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-400 font-medium tracking-wider uppercase block">Portal Tiket Resmi</span>
+          <span class="text-lg font-serif font-black tracking-tight block leading-none">FLASHTIKET</span>
+          <span class="text-[9px] font-mono text-[#525252] tracking-widest uppercase block mt-0.5">TERDISTRIBUSI · RESMI</span>
         </div>
       </div>
 
-      <!-- Center Nav Links with Color-Coded Category Dropdown (Desktop) -->
-      <nav class="hidden md:flex items-center gap-1 text-xs font-bold text-slate-600 dark:text-slate-300">
+      <!-- Center Desktop Nav Links -->
+      <nav class="hidden md:flex items-center gap-2 font-mono text-xs uppercase tracking-wider">
         <!-- Jelajah Event -->
         <button 
           @click="goHome"
-          class="px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-1.5"
-          :class="queueStore.currentStage === 'home' && !isCategoryOpen ? 'text-navy dark:text-sky bg-slate-50 dark:bg-slate-800' : 'text-slate-500 dark:text-slate-300'"
+          class="px-3.5 py-2 border transition-all cursor-pointer"
+          :class="queueStore.currentStage === 'home' && !isCategoryOpen ? 'bg-black text-white border-black' : 'border-transparent text-black hover:border-black'"
         >
-          <SvgIcon name="search" className="w-3.5 h-3.5" />
-          <span>Jelajah Event</span>
+          <span>Katalog Acara</span>
         </button>
 
-        <!-- Kategori Acara — Dropdown with Color Dots -->
+        <!-- Kategori Acara Dropdown -->
         <div class="relative category-dropdown-wrapper">
           <button 
             @click.stop="isCategoryOpen = !isCategoryOpen"
-            class="px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-1.5"
-            :class="isCategoryOpen ? 'text-navy dark:text-sky bg-slate-50 dark:bg-slate-800' : 'text-slate-500 dark:text-slate-300'"
+            class="px-3.5 py-2 border transition-all flex items-center gap-2 cursor-pointer"
+            :class="isCategoryOpen ? 'bg-black text-white border-black' : 'border-transparent text-black hover:border-black'"
           >
-            <!-- Show active category color dot -->
-            <span 
-              class="w-2.5 h-2.5 rounded-full ring-2 ring-offset-1 transition-all"
-              :style="{
-                backgroundColor: categoryColorMap[eventsStore.activeCategory]?.dot || '#64748b',
-                '--tw-ring-color': categoryColorMap[eventsStore.activeCategory]?.ring || '#94a3b8',
-              }"
-            ></span>
-            <span>Kategori Acara</span>
-            <!-- Chevron -->
-            <svg 
-              class="w-3 h-3 transition-transform duration-200" 
-              :class="{ 'rotate-180': isCategoryOpen }"
-              viewBox="0 0 20 20" fill="currentColor"
-            >
-              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-            </svg>
+            <span>Kategori [{{ eventsStore.activeCategory }}]</span>
+            <span class="text-[10px]">▼</span>
           </button>
 
           <!-- Category Dropdown Panel -->
-          <transition
-            enter-active-class="transition ease-out duration-200"
-            enter-from-class="opacity-0 translate-y-1 scale-95"
-            enter-to-class="opacity-100 translate-y-0 scale-100"
-            leave-active-class="transition ease-in duration-150"
-            leave-from-class="opacity-100 translate-y-0 scale-100"
-            leave-to-class="opacity-0 translate-y-1 scale-95"
+          <div 
+            v-if="isCategoryOpen"
+            class="absolute left-0 mt-2 w-60 bg-white border-2 border-black p-1 z-50 shadow-none"
           >
-            <div 
-              v-if="isCategoryOpen"
-              class="absolute left-1/2 -translate-x-1/2 mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-2 z-50"
-            >
-              <!-- Dropdown Header -->
-              <div class="px-3 py-2 border-b border-slate-100 dark:border-slate-800 mb-1">
-                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pilih Kategori</div>
-              </div>
-
-              <!-- Category Items -->
-              <button
-                v-for="cat in eventsStore.categories"
-                :key="cat"
-                @click="selectCategory(cat)"
-                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-150 group"
-                :class="eventsStore.activeCategory === cat 
-                  ? 'bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700' 
-                  : 'hover:bg-slate-50 dark:hover:bg-slate-800/70'"
-              >
-                <!-- Color Dot -->
-                <span 
-                  class="w-3 h-3 rounded-full ring-2 ring-offset-1 shrink-0 transition-transform group-hover:scale-125"
-                  :style="{
-                    backgroundColor: categoryColorMap[cat]?.dot || '#64748b',
-                    '--tw-ring-color': categoryColorMap[cat]?.ring || '#94a3b8',
-                  }"
-                ></span>
-
-                <!-- Label + Count -->
-                <div class="flex-1 flex items-center justify-between">
-                  <span 
-                    class="text-xs font-semibold transition-colors"
-                    :class="eventsStore.activeCategory === cat ? 'text-navy dark:text-sky' : 'text-slate-700 dark:text-slate-200 group-hover:text-navy dark:group-hover:text-sky'"
-                  >
-                    {{ cat }}
-                  </span>
-                  <span 
-                    class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                    :style="{
-                      backgroundColor: categoryColorMap[cat]?.bg || '#f1f5f9',
-                      color: categoryColorMap[cat]?.dot || '#64748b',
-                    }"
-                  >
-                    {{ countByCategory(cat) }}
-                  </span>
-                </div>
-
-                <!-- Active Check -->
-                <svg 
-                  v-if="eventsStore.activeCategory === cat"
-                  class="w-3.5 h-3.5 text-navy dark:text-sky shrink-0" 
-                  viewBox="0 0 20 20" fill="currentColor"
-                >
-                  <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
-                </svg>
-              </button>
+            <div class="px-3 py-2 border-b border-black text-[10px] font-mono text-[#525252] uppercase tracking-widest">
+              Pilih Kategori
             </div>
-          </transition>
+
+            <button
+              v-for="cat in eventsStore.categories"
+              :key="cat"
+              @click="selectCategory(cat)"
+              class="w-full flex items-center justify-between px-3 py-2 text-left font-mono text-xs uppercase transition-colors cursor-pointer"
+              :class="eventsStore.activeCategory === cat ? 'bg-black text-white' : 'hover:bg-black hover:text-white'"
+            >
+              <span>{{ cat }}</span>
+              <span class="text-[10px] font-mono opacity-60">({{ countByCategory(cat) }})</span>
+            </button>
+          </div>
         </div>
 
-        <!-- Cara Beli Tiket -->
+        <!-- Panduan Beli Tiket -->
         <button 
           @click="openHowToBuy"
-          class="px-3 py-2 rounded-xl text-slate-500 dark:text-slate-300 hover:text-navy dark:hover:text-sky hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-1.5"
+          class="px-3.5 py-2 border border-transparent hover:border-black text-black transition-all cursor-pointer"
         >
-          <SvgIcon name="info" className="w-3.5 h-3.5" />
-          <span>Cara Beli Tiket</span>
+          <span>Panduan</span>
         </button>
 
-        <!-- Admin Dashboard Portal (Hanya tampil jika login sebagai Admin) -->
+        <!-- Admin Dashboard Portal (Jika Login Sebagai Admin) -->
         <button 
           v-if="authStore.isAdmin"
           @click="queueStore.setStage('admin')"
-          class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 hover:brightness-110 text-white font-extrabold text-xs shadow-md transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0"
-          title="Buka Live Dashboard Admin"
+          class="px-3 py-1.5 bg-black text-white font-mono text-xs uppercase tracking-wider border-2 border-black hover:bg-white hover:text-black transition-all flex items-center gap-1.5 cursor-pointer"
         >
-          <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-          <SvgIcon name="crown" className="w-3.5 h-3.5 text-white" />
-          <span>Dashboard Admin</span>
+          <span class="w-2 h-2 bg-white"></span>
+          <span>Admin Portal</span>
         </button>
       </nav>
 
-      <!-- Right Actions: Tiket Saya + Auth / Profile + Hamburger -->
-      <div class="flex items-center gap-1.5 sm:gap-3">
+      <!-- Right Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
 
-        <!-- Theme Toggle (Neutral / System Auto-detect by default) -->
-        <button
-          @click="themeStore.cycleMode()"
-          class="px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 transition-all"
-          :title="themeStore.mode === 'system' ? 'Tema: Otomatis Netral (Mengikuti OS)' : (themeStore.mode === 'dark' ? 'Tema: Gelap (Dark)' : 'Tema: Terang (Light)')"
-        >
-          <SvgIcon v-if="themeStore.mode === 'system'" name="monitor" className="w-4 h-4 text-sky" />
-          <SvgIcon v-else-if="themeStore.mode === 'dark'" name="moon" className="w-4 h-4 text-amber" />
-          <SvgIcon v-else name="sun" className="w-4 h-4 text-amber" />
-          <span class="text-[11px] hidden xl:inline">
-            {{ themeStore.mode === 'system' ? 'Netral (OS)' : (themeStore.mode === 'dark' ? 'Gelap' : 'Terang') }}
-          </span>
-        </button>
-
-        <!-- Wishlist Button (Desktop) -->
+        <!-- Wishlist Button -->
         <button
           @click="queueStore.setStage('wishlist')"
-          class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-colors"
-          :class="queueStore.currentStage === 'wishlist' ? 'text-coral bg-coral/10' : 'text-slate-500 dark:text-slate-300 hover:text-coral hover:bg-coral/5'"
+          class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 border border-black font-mono text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-all cursor-pointer"
           title="Wishlist"
         >
-          <SvgIcon name="heart" className="w-4 h-4" />
-          <span 
-            v-if="wishlistStore.count" 
-            class="px-1.5 py-0.5 bg-coral/10 text-coral rounded-full text-[10px] font-bold"
-          >
-            {{ wishlistStore.count }}
-          </span>
+          <span>Favorit</span>
+          <span v-if="wishlistStore.count" class="font-bold">[{{ wishlistStore.count }}]</span>
         </button>
 
         <!-- Tiket Saya Button -->
         <button
           @click="authStore.isMyTicketsOpen = true"
-          class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-navy dark:hover:text-sky hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200/80 dark:border-slate-700"
+          class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 border-2 border-black font-mono text-xs uppercase tracking-wider text-black hover:bg-black hover:text-white transition-all cursor-pointer"
         >
-          <SvgIcon name="ticket" className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-          <span class="hidden lg:inline">Tiket Saya</span>
+          <span>Tiket Saya</span>
           <span 
             v-if="authStore.currentUser.myTickets?.length" 
-            class="px-1.5 py-0.5 bg-coral text-white rounded-full text-[10px] font-bold"
+            class="px-1.5 py-0.2 bg-black text-white text-[10px] font-bold group-hover:bg-white group-hover:text-black border border-black"
           >
             {{ authStore.currentUser.myTickets.length }}
           </span>
         </button>
 
-        <!-- AUTH: When Logged OUT (Desktop) -->
+        <!-- AUTH: When Logged OUT -->
         <template v-if="!authStore.isLoggedIn">
           <button
             @click="authStore.openLogin()"
-            class="hidden sm:inline-flex px-4 py-2 rounded-xl text-xs font-bold text-navy hover:bg-slate-100 transition-all border border-slate-200"
+            class="hidden sm:inline-flex px-4 py-2 border-2 border-black font-mono text-xs uppercase tracking-widest text-black hover:bg-black hover:text-white transition-all cursor-pointer"
           >
             Masuk
           </button>
 
           <button
             @click="authStore.openRegister()"
-            class="hidden md:inline-flex px-4 py-2 rounded-xl text-xs font-bold bg-navy text-white hover:bg-navy-light shadow-soft transition-all"
+            class="hidden md:inline-flex px-4 py-2 bg-black text-white font-mono text-xs uppercase tracking-widest border-2 border-black hover:bg-white hover:text-black transition-all cursor-pointer"
           >
             Daftar
           </button>
         </template>
 
-        <!-- AUTH: When Logged IN (Desktop) -->
+        <!-- AUTH: When Logged IN -->
         <div v-if="authStore.isLoggedIn" class="relative user-menu-wrapper hidden sm:block">
           <button 
             @click="isUserMenuOpen = !isUserMenuOpen"
-            class="flex items-center gap-2 p-1 pl-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full transition-all"
+            class="flex items-center gap-2 px-3 py-1.5 border-2 border-black bg-white hover:bg-black hover:text-white transition-all cursor-pointer font-mono text-xs uppercase"
           >
-            <span class="text-xs font-bold text-slate-700 hidden lg:inline max-w-[100px] truncate">
+            <span class="font-bold max-w-[120px] truncate">
               {{ authStore.currentUser.name.split(' ')[0] }}
             </span>
-            <div class="w-8 h-8 rounded-full bg-navy text-white flex items-center justify-center font-bold text-xs shadow-sm">
+            <span class="w-6 h-6 bg-black text-white flex items-center justify-center font-bold text-[10px]">
               {{ authStore.currentUser.avatarText || 'KP' }}
-            </div>
+            </span>
           </button>
 
           <!-- Dropdown Profile Menu -->
           <div 
             v-if="isUserMenuOpen"
-            class="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 text-xs space-y-1"
+            class="absolute right-0 mt-2 w-56 bg-white border-2 border-black p-1 z-50 text-xs font-mono uppercase"
           >
-            <div class="px-3 py-2 border-b border-slate-100">
-              <div class="font-bold text-slate-800 text-sm truncate">{{ authStore.currentUser.name }}</div>
-              <div class="text-[11px] text-slate-400 truncate">{{ authStore.currentUser.email }}</div>
+            <div class="px-3 py-2 border-b border-black">
+              <div class="font-bold text-black text-xs truncate">{{ authStore.currentUser.name }}</div>
+              <div class="text-[10px] text-[#525252] truncate lowercase">{{ authStore.currentUser.email }}</div>
             </div>
 
             <button 
               v-if="authStore.isAdmin"
               @click="queueStore.setStage('admin'); isUserMenuOpen = false;"
-              class="w-full text-left px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold flex items-center gap-2"
+              class="w-full text-left px-3 py-2 text-black hover:bg-black hover:text-white transition-colors flex items-center gap-2 cursor-pointer font-bold"
             >
-              <SvgIcon name="crown" className="w-4 h-4 text-amber-500" />
-              <span>Dashboard Admin</span>
+              <span>[Admin Dashboard]</span>
             </button>
 
             <button 
               @click="authStore.isMyTicketsOpen = true; isUserMenuOpen = false;"
-              class="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-50 text-slate-700 font-semibold flex items-center gap-2"
+              class="w-full text-left px-3 py-2 text-black hover:bg-black hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
             >
-              <SvgIcon name="ticket" className="w-4 h-4 text-purple-600" />
               <span>Tiket Saya</span>
             </button>
 
             <button 
               @click="authStore.logout(); isUserMenuOpen = false;"
-              class="w-full text-left px-3 py-2 rounded-xl hover:bg-coral-light text-coral font-semibold flex items-center gap-2"
+              class="w-full text-left px-3 py-2 text-black hover:bg-black hover:text-white border-t border-black transition-colors flex items-center gap-2 cursor-pointer"
             >
-              <SvgIcon name="cancel" className="w-4 h-4 text-coral" />
               <span>Keluar / Logout</span>
             </button>
           </div>
         </div>
 
-        <!-- ═══════════════ MOBILE HAMBURGER BUTTON ═══════════════ -->
+        <!-- MOBILE HAMBURGER BUTTON -->
         <button 
           @click="isMobileMenuOpen = !isMobileMenuOpen"
-          class="md:hidden relative w-10 h-10 rounded-xl flex items-center justify-center hover:bg-slate-100 transition-colors"
-          :class="isMobileMenuOpen ? 'bg-slate-100' : ''"
+          class="md:hidden w-10 h-10 border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors cursor-pointer"
         >
-          <!-- Animated Hamburger → X -->
-          <div class="w-5 h-4 flex flex-col justify-between relative">
-            <span 
-              class="block h-0.5 w-full bg-navy rounded-full transition-all duration-300 origin-center"
-              :class="isMobileMenuOpen ? 'rotate-45 translate-y-[7px]' : ''"
-            ></span>
-            <span 
-              class="block h-0.5 w-full bg-navy rounded-full transition-all duration-300"
-              :class="isMobileMenuOpen ? 'opacity-0 scale-x-0' : ''"
-            ></span>
-            <span 
-              class="block h-0.5 w-full bg-navy rounded-full transition-all duration-300 origin-center"
-              :class="isMobileMenuOpen ? '-rotate-45 -translate-y-[7px]' : ''"
-            ></span>
-          </div>
-
-          <!-- Notification dot when there are wishlist items -->
-          <span 
-            v-if="wishlistStore.count || authStore.currentUser.myTickets?.length"
-            class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-coral animate-pulse"
-          ></span>
+          <span class="font-mono text-xs font-bold">{{ isMobileMenuOpen ? '✕' : '☰' }}</span>
         </button>
 
       </div>
     </div>
 
-    <!-- ═══════════════ MOBILE SLIDE-DOWN DRAWER ═══════════════ -->
-    <transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 -translate-y-4 max-h-0"
-      enter-to-class="opacity-100 translate-y-0 max-h-[100vh]"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 translate-y-0 max-h-[100vh]"
-      leave-to-class="opacity-0 -translate-y-4 max-h-0"
+    <!-- MOBILE SLIDE-DOWN DRAWER -->
+    <div 
+      v-if="isMobileMenuOpen"
+      class="md:hidden bg-white border-t-2 border-black overflow-y-auto"
+      style="max-height: calc(100vh - 64px);"
     >
-      <div 
-        v-if="isMobileMenuOpen"
-        class="md:hidden bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 overflow-y-auto transition-colors"
-        style="max-height: calc(100vh - 56px);"
-      >
-        <div class="px-4 py-4 space-y-3">
+      <div class="p-6 space-y-4 font-mono uppercase text-xs">
 
-          <!-- User Profile Card (Mobile) -->
-          <div v-if="authStore.isLoggedIn" class="bg-slate-50 dark:bg-slate-800/80 rounded-2xl p-4 flex items-center gap-3">
-            <div class="w-11 h-11 rounded-full bg-navy dark:bg-sky text-white flex items-center justify-center font-bold text-sm shadow-sm">
-              {{ authStore.currentUser.avatarText || 'KP' }}
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{{ authStore.currentUser.name }}</div>
-              <div class="text-[11px] text-slate-400 truncate">{{ authStore.currentUser.email }}</div>
-            </div>
+        <!-- User Profile Card (Mobile) -->
+        <div v-if="authStore.isLoggedIn" class="border-2 border-black p-4 flex items-center gap-3">
+          <div class="w-10 h-10 bg-black text-white flex items-center justify-center font-bold text-xs">
+            {{ authStore.currentUser.avatarText || 'KP' }}
           </div>
-
-          <!-- Auth Buttons (Mobile, when logged out) -->
-          <div v-if="!authStore.isLoggedIn" class="flex gap-2">
-            <button
-              @click="authStore.openLogin(); closeMobileMenu()"
-              class="flex-1 py-3 rounded-2xl text-sm font-bold text-navy dark:text-sky border-2 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-center"
-            >
-              Masuk
-            </button>
-            <button
-              @click="authStore.openRegister(); closeMobileMenu()"
-              class="flex-1 py-3 rounded-2xl text-sm font-bold bg-navy dark:bg-sky text-white hover:bg-navy-light shadow-soft transition-all text-center"
-            >
-              Daftar
-            </button>
+          <div class="flex-1 min-w-0">
+            <div class="font-bold text-black text-sm truncate">{{ authStore.currentUser.name }}</div>
+            <div class="text-[10px] text-[#525252] truncate lowercase">{{ authStore.currentUser.email }}</div>
           </div>
+        </div>
 
-          <!-- Theme Toggle (Mobile Quick Row) -->
-          <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-            <div class="flex items-center gap-2.5">
-              <SvgIcon v-if="themeStore.mode === 'system'" name="monitor" className="w-4 h-4 text-sky" />
-              <SvgIcon v-else-if="themeStore.mode === 'dark'" name="moon" className="w-4 h-4 text-amber" />
-              <SvgIcon v-else name="sun" className="w-4 h-4 text-amber" />
-              <div>
-                <div class="text-xs font-bold text-slate-700 dark:text-slate-200">Mode Tampilan</div>
-                <div class="text-[10px] text-slate-400">
-                  {{ themeStore.mode === 'system' ? 'Netral (Mengikuti Tema OS)' : (themeStore.mode === 'dark' ? 'Mode Gelap (Dark)' : 'Mode Terang (Light)') }}
-                </div>
-              </div>
-            </div>
-            <button
-              @click="themeStore.cycleMode()"
-              class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm"
-            >
-              Ganti
-            </button>
-          </div>
+        <!-- Auth Buttons (Mobile, when logged out) -->
+        <div v-if="!authStore.isLoggedIn" class="flex gap-2">
+          <button
+            @click="authStore.openLogin(); closeMobileMenu()"
+            class="flex-1 py-3 border-2 border-black font-bold text-center hover:bg-black hover:text-white transition-colors cursor-pointer"
+          >
+            Masuk
+          </button>
+          <button
+            @click="authStore.openRegister(); closeMobileMenu()"
+            class="flex-1 py-3 bg-black text-white border-2 border-black font-bold text-center hover:bg-white hover:text-black transition-colors cursor-pointer"
+          >
+            Daftar
+          </button>
+        </div>
 
-          <!-- Divider -->
-          <div class="border-t border-slate-100 dark:border-slate-800"></div>
+        <!-- Navigation Links -->
+        <div class="space-y-1 pt-2 border-t border-black">
+          <button 
+            @click="goHome"
+            class="w-full text-left py-2.5 px-3 border border-transparent hover:border-black hover:bg-black hover:text-white transition-colors cursor-pointer"
+          >
+            Katalog Acara
+          </button>
 
-          <!-- Navigation Items -->
-          <div class="space-y-1">
-            <!-- Jelajah Event -->
-            <button 
-              @click="goHome"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all"
-              :class="queueStore.currentStage === 'home' ? 'bg-navy/5 dark:bg-sky/10 text-navy dark:text-sky' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'"
-            >
-              <SvgIcon name="search" className="w-5 h-5" />
-              <span class="text-sm font-semibold">Jelajah Event</span>
-            </button>
+          <button 
+            @click="openHowToBuy"
+            class="w-full text-left py-2.5 px-3 border border-transparent hover:border-black hover:bg-black hover:text-white transition-colors cursor-pointer"
+          >
+            Panduan Pembelian
+          </button>
 
-            <!-- Kategori Acara (Expandable) -->
-            <div>
-              <button 
-                @click="isMobileCategoryExpanded = !isMobileCategoryExpanded"
-                class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-              >
-                <span 
-                  class="w-5 h-5 rounded-full ring-2 ring-offset-1 flex items-center justify-center"
-                  :style="{
-                    backgroundColor: categoryColorMap[eventsStore.activeCategory]?.dot || '#64748b',
-                    '--tw-ring-color': categoryColorMap[eventsStore.activeCategory]?.ring || '#94a3b8',
-                  }"
-                ></span>
-                <span class="text-sm font-semibold flex-1">Kategori Acara</span>
-                <svg 
-                  class="w-4 h-4 text-slate-400 transition-transform duration-200" 
-                  :class="{ 'rotate-180': isMobileCategoryExpanded }"
-                  viewBox="0 0 20 20" fill="currentColor"
-                >
-                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                </svg>
-              </button>
+          <button 
+            @click="queueStore.setStage('wishlist'); closeMobileMenu()"
+            class="w-full text-left py-2.5 px-3 border border-transparent hover:border-black hover:bg-black hover:text-white transition-colors cursor-pointer"
+          >
+            Favorit ({{ wishlistStore.count }})
+          </button>
 
-              <!-- Expanded Category Grid -->
-              <transition
-                enter-active-class="transition-all duration-200 ease-out"
-                enter-from-class="opacity-0 max-h-0"
-                enter-to-class="opacity-100 max-h-96"
-                leave-active-class="transition-all duration-150 ease-in"
-                leave-from-class="opacity-100 max-h-96"
-                leave-to-class="opacity-0 max-h-0"
-              >
-                <div v-if="isMobileCategoryExpanded" class="overflow-hidden pl-4 pr-2 mt-1 space-y-0.5">
-                  <button
-                    v-for="cat in eventsStore.categories"
-                    :key="cat"
-                    @click="selectCategory(cat)"
-                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all group"
-                    :class="eventsStore.activeCategory === cat 
-                      ? 'bg-slate-50 dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700' 
-                      : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'"
-                  >
-                    <span 
-                      class="w-3 h-3 rounded-full ring-2 ring-offset-1 shrink-0"
-                      :style="{
-                        backgroundColor: categoryColorMap[cat]?.dot || '#64748b',
-                        '--tw-ring-color': categoryColorMap[cat]?.ring || '#94a3b8',
-                      }"
-                    ></span>
-                    <span 
-                      class="text-xs font-semibold flex-1"
-                      :class="eventsStore.activeCategory === cat ? 'text-navy dark:text-sky' : 'text-slate-600 dark:text-slate-300'"
-                    >
-                      {{ cat }}
-                    </span>
-                    <span 
-                      class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                      :style="{
-                        backgroundColor: categoryColorMap[cat]?.bg || '#f1f5f9',
-                        color: categoryColorMap[cat]?.dot || '#64748b',
-                      }"
-                    >
-                      {{ countByCategory(cat) }}
-                    </span>
-                    <svg 
-                      v-if="eventsStore.activeCategory === cat"
-                      class="w-3.5 h-3.5 text-navy dark:text-sky shrink-0" 
-                      viewBox="0 0 20 20" fill="currentColor"
-                    >
-                      <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
-              </transition>
-            </div>
+          <button 
+            @click="authStore.isMyTicketsOpen = true; closeMobileMenu()"
+            class="w-full text-left py-2.5 px-3 border border-transparent hover:border-black hover:bg-black hover:text-white transition-colors cursor-pointer"
+          >
+            Tiket Saya ({{ authStore.currentUser.myTickets?.length || 0 }})
+          </button>
 
-            <!-- Cara Beli Tiket -->
-            <button 
-              @click="openHowToBuy"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-            >
-              <SvgIcon name="info" className="w-5 h-5" />
-              <span class="text-sm font-semibold">Cara Beli Tiket</span>
-            </button>
+          <button 
+            v-if="authStore.isAdmin"
+            @click="queueStore.setStage('admin'); closeMobileMenu();"
+            class="w-full text-left py-2.5 px-3 bg-black text-white border-2 border-black hover:bg-white hover:text-black transition-colors cursor-pointer"
+          >
+            [Dashboard Admin]
+          </button>
 
-            <!-- Admin Dashboard (Mobile) -->
-            <button 
-              v-if="authStore.isAdmin"
-              @click="queueStore.setStage('admin'); closeMobileMenu();"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left bg-gradient-to-r from-amber-500/10 to-rose-500/10 text-amber-600 dark:text-amber-400 hover:brightness-105 transition-all font-bold"
-            >
-              <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-              <SvgIcon name="crown" className="w-4 h-4 text-amber-500" />
-              <span class="text-sm font-bold flex-1">Dashboard Admin</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600">AKTIF</span>
-            </button>
-
-            <!-- Wishlist -->
-            <button 
-              @click="queueStore.setStage('wishlist'); closeMobileMenu()"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all"
-              :class="queueStore.currentStage === 'wishlist' ? 'text-coral bg-coral/5 dark:bg-coral/10' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'"
-            >
-              <SvgIcon name="heart" className="w-5 h-5" />
-              <span class="text-sm font-semibold flex-1">Wishlist</span>
-              <span 
-                v-if="wishlistStore.count" 
-                class="px-2 py-0.5 bg-coral/10 text-coral rounded-full text-xs font-bold"
-              >
-                {{ wishlistStore.count }}
-              </span>
-            </button>
-
-            <!-- Tiket Saya -->
-            <button 
-              @click="authStore.isMyTicketsOpen = true; closeMobileMenu()"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-            >
-              <SvgIcon name="ticket" className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-              <span class="text-sm font-semibold flex-1">Tiket Saya</span>
-              <span 
-                v-if="authStore.currentUser.myTickets?.length" 
-                class="px-2 py-0.5 bg-coral text-white rounded-full text-xs font-bold"
-              >
-                {{ authStore.currentUser.myTickets.length }}
-              </span>
-            </button>
-          </div>
-
-          <!-- Divider -->
-          <div class="border-t border-slate-100 dark:border-slate-800"></div>
-
-          <!-- Logout (Mobile) -->
           <button 
             v-if="authStore.isLoggedIn"
             @click="authStore.logout(); closeMobileMenu()"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left text-coral hover:bg-coral/5 transition-all"
+            class="w-full text-left py-2.5 px-3 border-t border-black text-[#525252] hover:text-black transition-colors cursor-pointer pt-3"
           >
-            <SvgIcon name="cancel" className="w-5 h-5 text-coral" />
-            <span class="text-sm font-semibold">Keluar / Logout</span>
+            Keluar / Logout
           </button>
-
-          <!-- Footer Info -->
-          <div class="pt-2 pb-1 text-center">
-            <span class="text-[10px] text-slate-300 dark:text-slate-600 font-medium">FlashTiket © 2026 — Portal Tiket Resmi</span>
-          </div>
         </div>
+
       </div>
-    </transition>
+    </div>
   </header>
 </template>

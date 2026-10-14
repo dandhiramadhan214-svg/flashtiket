@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;600&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,104 +7,158 @@
     scroll-behavior: smooth;
   }
   body {
-    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
-    background-color: #f8fafc;
-    color: #1e293b;
+    font-family: 'Source Serif 4', Georgia, serif;
+    background-color: #FFFFFF;
+    color: #000000;
     overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
   }
-  .dark body {
-    background-color: #020617;
-    color: #f8fafc;
+
+  /* Reset all rounded elements to strictly sharp 0px */
+  *, *::before, *::after {
+    border-radius: 0px !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-feature-settings: 'lnum' 1;
+    letter-spacing: -0.02em;
+  }
+
+  /* Focus visible accessibility standards */
+  button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
+    outline: 3px solid #000000 !important;
+    outline-offset: 3px !important;
+  }
+
+  input:focus, textarea:focus {
+    outline: none !important;
+    border-color: #000000 !important;
+    border-bottom-width: 3px !important;
   }
 }
 
-/* Explicit high-contrast classes with full dark-mode harmony */
-.bg-navy {
-  background-color: #1e266d;
-}
-.text-navy {
-  color: #1e266d;
-}
-.border-navy {
-  border-color: #1e266d;
+/* ── Minimalist Monochrome Textures & Patterns ─────────────────── */
+
+/* 1. Global Horizontal Micro-Lines (Subtle paper feel) */
+.pattern-lines {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.025) 2px,
+    rgba(0, 0, 0, 0.025) 3px
+  );
+  background-size: 100% 4px;
 }
 
-/* Dark mode overrides for high-contrast visibility */
-.dark .text-navy {
-  color: #38bdf8 !important; /* Crisp Sky Blue for dark background */
-}
-.dark .bg-navy {
-  background-color: #1e266d;
-}
-.dark .border-navy {
-  border-color: #38bdf8;
+/* 2. Editorial Grid Pattern */
+.pattern-grid {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
-.hover\:bg-navy-light:hover {
-  background-color: #2d3a8c;
+/* 3. Inverted Section Vertical Lines */
+.pattern-lines-inverted {
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.04) 2px,
+    rgba(255, 255, 255, 0.04) 3px
+  );
+  background-size: 4px 100%;
 }
 
-.bg-navy-gradient {
-  background: linear-gradient(135deg, #1e266d 0%, #161c4f 50%, #0f153d 100%);
-}
-.dark .bg-navy-gradient {
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
-}
-
-/* Dark mode tints for alert badges so text stays 100% visible */
-.dark .bg-coral-light {
-  background-color: rgba(225, 29, 72, 0.18) !important;
-}
-.dark .bg-amber-light {
-  background-color: rgba(245, 158, 11, 0.18) !important;
-}
-.dark .bg-sky-light {
-  background-color: rgba(56, 189, 248, 0.18) !important;
-}
-.dark .bg-mint-light {
-  background-color: rgba(16, 185, 129, 0.18) !important;
+/* 4. Diagonal Lines */
+.pattern-diagonal {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 32px,
+    rgba(0, 0, 0, 0.03) 32px,
+    rgba(0, 0, 0, 0.03) 33px
+  );
 }
 
-/* Minimal Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-.dark ::-webkit-scrollbar-thumb { background: #334155; }
-.dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
+/* ── Editorial Utility Classes ─────────────────────────────────── */
 
-/* Utility: subtle gradient text */
-.text-gradient-navy {
-  background: linear-gradient(135deg, #1e266d, #4f8cff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.btn-mono-primary {
+  background-color: #000000;
+  color: #FFFFFF;
+  border: 2px solid #000000;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.8125rem;
+  padding: 0.875rem 1.75rem;
+  transition: all 100ms ease-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  cursor: pointer;
 }
-.dark .text-gradient-navy {
-  background: linear-gradient(135deg, #38bdf8, #818cf8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Animated progress bar fill */
-@keyframes progressPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-.animate-progress-pulse {
-  animation: progressPulse 2s ease-in-out infinite;
+.btn-mono-primary:hover {
+  background-color: #FFFFFF;
+  color: #000000;
+  border-color: #000000;
 }
 
-/* Smooth stage transitions */
-.stage-fade-enter-active,
-.stage-fade-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+.btn-mono-secondary {
+  background-color: transparent;
+  color: #000000;
+  border: 2px solid #000000;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.8125rem;
+  padding: 0.875rem 1.75rem;
+  transition: all 100ms ease-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  cursor: pointer;
 }
-.stage-fade-enter-from {
-  opacity: 0;
-  transform: translateY(8px);
+.btn-mono-secondary:hover {
+  background-color: #000000;
+  color: #FFFFFF;
 }
-.stage-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
+
+/* Card Inversion Effect on Hover */
+.card-mono-hover {
+  background-color: #FFFFFF;
+  color: #000000;
+  border: 1px solid #000000;
+  transition: all 100ms ease-out;
 }
+.card-mono-hover:hover {
+  background-color: #000000;
+  color: #FFFFFF;
+  border-color: #000000;
+}
+
+/* Editorial Drop Cap */
+.drop-cap::first-letter {
+  float: left;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 4.25rem;
+  line-height: 0.85;
+  margin-right: 0.75rem;
+  padding: 0.35rem 0.5rem;
+  border: 2px solid #000000;
+  font-weight: 700;
+}
+
+/* Box & Border utilities */
+.border-thin { border: 1px solid #000000; }
+.border-medium { border: 2px solid #000000; }
+.border-thick { border: 4px solid #000000; }
+.border-ultra { border: 8px solid #000000; }
+.border-hairline { border: 1px solid #E5E5E5; }
