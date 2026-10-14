@@ -94,6 +94,16 @@ export const useTicketStore = defineStore('ticket', () => {
     email: 'kevin.pratama@war-tiket.com',
   });
 
+  // Official Financial Payment & Invoice Details
+  const paymentDetails = ref({
+    method: 'BCA Virtual Account',
+    channel: 'bca_va',
+    accountNumber: '8801 0812 3456 7890',
+    referenceNo: '',
+    invoiceNo: '',
+    paidAt: '',
+  });
+
   // Anti-scalping multi-attendee records (1 Ticket = 1 Identity NIK)
   const selectedSeats = ref(['VIP-A08']);
   const attendees = ref([
@@ -300,17 +310,39 @@ export const useTicketStore = defineStore('ticket', () => {
       }
     }
 
+    const refNo = 'TRX-' + Math.random().toString(36).substring(2, 9).toUpperCase() + '-SETTLED';
+    const invNo = 'INV/' + new Date().getFullYear() + '/FT/' + Math.random().toString(36).substring(2, 8).toUpperCase();
+    const paidTimestamp = new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' });
+
+    paymentDetails.value = {
+      method: methodName || paymentDetails.value.method || 'BCA Virtual Account',
+      accountNumber: accNumber || paymentDetails.value.accountNumber || '8801 0812 3456 7890',
+      referenceNo: refNo,
+      invoiceNo: invNo,
+      paidAt: paidTimestamp,
+    };
+
     issuedTicket.value = {
       orderId,
+      invoiceNo: invNo,
+      referenceNo: refNo,
+      paymentMethod: paymentDetails.value.method,
+      accountNumber: paymentDetails.value.accountNumber,
       holderName: customer.value.name,
+      holderNik: customer.value.nik,
+      holderEmail: customer.value.email,
+      holderPhone: customer.value.phone,
       categoryName: categoryDetails[cat].name,
+      unitPrice: unitPrice.value,
+      bookingFee: bookingFee.value,
+      taxAmount: taxAmount.value,
       qty: quantity.value,
       seatNo: `${selectedSeatName.value} (${selectedSeatZone.value})`,
       seats: [...selectedSeats.value],
       attendees: [...attendees.value],
       qrHash: `SECURE: #${Math.random().toString(36).substring(2, 10).toUpperCase()}-SHA256`,
       totalPaid: grandTotal.value,
-      issuedAt: new Date().toLocaleDateString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
+      issuedAt: paidTimestamp,
     };
 
     // Trigger cloud sync to Supabase
@@ -376,6 +408,7 @@ export const useTicketStore = defineStore('ticket', () => {
     setSelectedSeats,
     attendees,
     syncAttendees,
+    paymentDetails,
     quantity,
     setQuantity,
     currentOrderId,
