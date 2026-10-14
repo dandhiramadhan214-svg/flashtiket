@@ -14,7 +14,7 @@ const currentEvent = computed(() => eventsStore.selectedEvent);
 const selectedSeatsList = ref(['VIP-A08']);
 const hoveredSeat = ref(null);
 
-// VIP Seat dots (4 rows x 14 seats)
+// VIP Seat dots (4 rows x 14 seats) - Elevated behind Standing
 const vipSeats = computed(() => {
   const list = [];
   const rows = ['A', 'B', 'C', 'D'];
@@ -34,7 +34,7 @@ const vipSeats = computed(() => {
         row: rows[r],
         num: c,
         x: 236 + (c - 1) * 22,
-        y: 190 + r * 16,
+        y: 280 + r * 16,
         isBooked,
         isSelected,
       });
@@ -145,7 +145,7 @@ function selectIndividualSeat(seat) {
 }
 
 // Select zone/category
-function selectCategoryZone(catKey) {
+function selectCategoryZone(catKey, zone = 'back') {
   ticketStore.selectCategory(catKey);
   if (catKey === 'cat1') {
     selectedSeatsList.value = Array.from({ length: ticketStore.quantity }, (_, i) => `CAT1-FEST-${String.fromCharCode(65 + i)}`);
@@ -153,13 +153,21 @@ function selectCategoryZone(catKey) {
   } else if (catKey === 'vip') {
     autoPickAdjacentSeats('vip', ticketStore.quantity);
   } else {
-    autoPickAdjacentSeats('cat2', ticketStore.quantity);
+    autoPickAdjacentSeats('cat2', ticketStore.quantity, zone);
   }
 }
 
-// Helper to auto-pick adjacent available seats
-function autoPickAdjacentSeats(category, count) {
-  const targetSeats = category === 'vip' ? vipSeats.value : tribuneBackSeats.value;
+// Helper to auto-pick adjacent available seats with zone support (west, east, back)
+function autoPickAdjacentSeats(category, count, zone = 'back') {
+  let targetSeats;
+  if (category === 'vip') {
+    targetSeats = vipSeats.value;
+  } else {
+    if (zone === 'west') targetSeats = tribuneLeftSeats.value;
+    else if (zone === 'east') targetSeats = tribuneRightSeats.value;
+    else targetSeats = tribuneBackSeats.value;
+  }
+
   const available = targetSeats.filter(s => !s.isBooked);
   const picked = available.slice(0, Math.min(count, available.length)).map(s => s.id);
 
@@ -294,12 +302,31 @@ const cats = [
               <text x="380" y="136" fill="#000000" font-size="7" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle">CATWALK</text>
             </g>
 
-            <!-- 1. VIP ROYAL FLOOR (GOLD ZONE #F59E0B) - Seated in front of stage -->
-            <g>
-              <rect x="220" y="155" width="320" height="95" fill="#f59e0b08" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" />
+            <!-- 1. CAT 1 FESTIVAL STANDING (CYAN ZONE #06B6D4) - FRONT PIT TOUCHING CATWALK -->
+            <g class="cursor-pointer" @click="selectCategoryZone('cat1')">
+              <rect x="180" y="150" width="400" height="85" 
+                fill="#06b6d418" 
+                :stroke="ticketStore.selectedCategory === 'cat1' ? '#06B6D4' : '#0891b2'" 
+                stroke-width="2" 
+                :stroke-dasharray="ticketStore.selectedCategory === 'cat1' ? 'none' : '5 3'" 
+              />
               
-              <text x="380" y="172" fill="#F59E0B" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle" letter-spacing="1">
-                VIP ROYAL FLOOR (SEATED) · EMAS
+              <text x="380" y="185" 
+                fill="#06B6D4" 
+                font-size="11" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle" letter-spacing="1.5">
+                CAT 1: FESTIVAL STANDING (DEPAN PANGGUNG) · CYAN
+              </text>
+              <text x="380" y="205" fill="#67e8f9" font-size="8.5" font-family="'JetBrains Mono', monospace" text-anchor="middle">
+                Area Berdiri Bebas · Paling Dekat Panggung &amp; Barikade Catwalk
+              </text>
+            </g>
+
+            <!-- 2. VIP ROYAL FLOOR (GOLD ZONE #F59E0B) - ELEVATED SEATED SECTION BEHIND STANDING -->
+            <g>
+              <rect x="220" y="250" width="320" height="98" fill="#f59e0b0c" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" />
+              
+              <text x="380" y="268" fill="#F59E0B" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle" letter-spacing="1">
+                VIP ROYAL FLOOR (SEATED) · EMAS (TRIBUN TENGAH)
               </text>
 
               <g v-for="seat in vipSeats" :key="seat.id">
@@ -318,28 +345,11 @@ const cats = [
               </g>
             </g>
 
-            <!-- 2. CAT 1 FESTIVAL STANDING (CYAN ZONE #06B6D4) - Completely separated below VIP -->
-            <g class="cursor-pointer" @click="selectCategoryZone('cat1')">
-              <rect x="180" y="260" width="400" height="75" 
-                fill="#06b6d412" 
-                :stroke="ticketStore.selectedCategory === 'cat1' ? '#06B6D4' : '#0891b2'" 
-                :stroke-width="ticketStore.selectedCategory === 'cat1' ? 2.5 : 1" 
-                stroke-dasharray="5 3" 
-              />
-              
-              <text x="380" y="292" 
-                fill="#06B6D4" 
-                font-size="11" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle" letter-spacing="1.5">
-                CAT 1: FESTIVAL STANDING AREA · CYAN
+            <!-- 3. CAT 2 TRIBUN TIMUR & BARAT (PURPLE ZONE #8B5CF6) - CLICKABLE ZONES -->
+            <g class="cursor-pointer" @click="selectCategoryZone('cat2', 'west')">
+              <text x="95" y="152" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800">
+                ← TRIBUN BARAT (KIRI)
               </text>
-              <text x="380" y="310" fill="#67e8f9" font-size="8" font-family="'JetBrains Mono', monospace" text-anchor="middle">
-                Area Berdiri Bebas · Kapasitas Luas &amp; Dekat Catwalk
-              </text>
-            </g>
-
-            <!-- 3. CAT 2 TRIBUN TIMUR & BARAT (PURPLE ZONE #8B5CF6) -->
-            <g>
-              <text x="95" y="152" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800">TRIBUN BARAT (CAT 2)</text>
               <g v-for="seat in tribuneLeftSeats" :key="seat.id">
                 <circle
                   :cx="seat.x"
@@ -351,13 +361,15 @@ const cats = [
                   :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer transition-transform duration-100 hover:scale-125'"
                   @mouseenter="!seat.isBooked && (hoveredSeat = seat.id)"
                   @mouseleave="hoveredSeat === seat.id && (hoveredSeat = null)"
-                  @click="selectIndividualSeat(seat)"
+                  @click.stop="selectIndividualSeat(seat)"
                 />
               </g>
             </g>
 
-            <g>
-              <text x="610" y="152" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800">TRIBUN TIMUR (CAT 2)</text>
+            <g class="cursor-pointer" @click="selectCategoryZone('cat2', 'east')">
+              <text x="610" y="152" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800">
+                TRIBUN TIMUR (KANAN) →
+              </text>
               <g v-for="seat in tribuneRightSeats" :key="seat.id">
                 <circle
                   :cx="seat.x"
@@ -369,15 +381,15 @@ const cats = [
                   :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer transition-transform duration-100 hover:scale-125'"
                   @mouseenter="!seat.isBooked && (hoveredSeat = seat.id)"
                   @mouseleave="hoveredSeat === seat.id && (hoveredSeat = null)"
-                  @click="selectIndividualSeat(seat)"
+                  @click.stop="selectIndividualSeat(seat)"
                 />
               </g>
             </g>
 
             <!-- 4. CAT 2 TRIBUN UTAMA GRANDSTAND (PURPLE ZONE #8B5CF6) -->
-            <g>
-              <rect x="150" y="350" width="460" height="98" fill="#8b5cf60a" stroke="#8B5CF6" stroke-width="1.5" stroke-dasharray="4 4" />
-              <text x="380" y="372" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800" text-anchor="middle">
+            <g class="cursor-pointer" @click="selectCategoryZone('cat2', 'back')">
+              <rect x="150" y="360" width="460" height="98" fill="#8b5cf60a" stroke="#8B5CF6" stroke-width="1.5" stroke-dasharray="4 4" />
+              <text x="380" y="380" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800" text-anchor="middle">
                 TRIBUN UTAMA GRANDSTAND (CAT 2) · UNGU
               </text>
 
@@ -392,7 +404,7 @@ const cats = [
                   :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer transition-transform duration-100 hover:scale-125'"
                   @mouseenter="!seat.isBooked && (hoveredSeat = seat.id)"
                   @mouseleave="hoveredSeat === seat.id && (hoveredSeat = null)"
-                  @click="selectIndividualSeat(seat)"
+                  @click.stop="selectIndividualSeat(seat)"
                 />
               </g>
             </g>
@@ -410,16 +422,16 @@ const cats = [
         <!-- Official Concert Color Legend Bar -->
         <div class="flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] text-[#525252] pt-3 border-t border-black uppercase">
           <div class="flex items-center gap-1.5">
-            <span class="w-3.5 h-3.5 bg-[#F59E0B] inline-block border border-black"></span>
-            <span class="text-black font-bold">VIP (Emas)</span>
+            <span class="w-3.5 h-3.5 bg-[#06B6D4] inline-block border border-black"></span>
+            <span class="text-black font-bold">CAT 1 Standing (Depan)</span>
           </div>
           <div class="flex items-center gap-1.5">
-            <span class="w-3.5 h-3.5 bg-[#06B6D4] inline-block border border-black"></span>
-            <span class="text-black font-bold">CAT 1 (Cyan)</span>
+            <span class="w-3.5 h-3.5 bg-[#F59E0B] inline-block border border-black"></span>
+            <span class="text-black font-bold">VIP Seated (Tengah)</span>
           </div>
           <div class="flex items-center gap-1.5">
             <span class="w-3.5 h-3.5 bg-[#8B5CF6] inline-block border border-black"></span>
-            <span class="text-black font-bold">CAT 2 (Ungu)</span>
+            <span class="text-black font-bold">CAT 2 Tribun (Kiri/Kanan/Bawah)</span>
           </div>
           <div class="flex items-center gap-1.5">
             <span class="w-3.5 h-3.5 bg-white border-2 border-black inline-block"></span>
@@ -439,10 +451,10 @@ const cats = [
         <div class="space-y-3 font-mono">
           <div v-for="cat in cats" :key="cat.key"
             @click="selectCategoryZone(cat.key)"
-            class="border-2 p-5 cursor-pointer transition-all duration-100"
+            class="border-2 p-5 cursor-pointer transition-colors duration-150"
             :class="ticketStore.selectedCategory === cat.key
               ? 'bg-black text-white border-black'
-              : 'bg-white text-black border-black hover:border-4'"
+              : 'bg-white text-black border-black hover:bg-[#F2F2F2]'"
           >
             <div class="flex items-start justify-between">
               <div>
@@ -460,6 +472,35 @@ const cats = [
             </div>
 
             <p class="font-body text-xs opacity-80 mt-2">{{ cat.desc }}</p>
+
+            <!-- Specific Tribune Quick Picker for CAT 2 -->
+            <div 
+              v-if="cat.key === 'cat2' && ticketStore.selectedCategory === 'cat2'" 
+              class="pt-3 mt-3 border-t border-white/30 space-y-2"
+              @click.stop
+            >
+              <div class="text-[10px] uppercase tracking-wider text-white/80">Pilih Zona Kursi Tribun:</div>
+              <div class="grid grid-cols-3 gap-1.5 text-[9px] font-bold">
+                <button 
+                  @click="selectCategoryZone('cat2', 'west')"
+                  class="border border-white py-1 px-1 text-center hover:bg-white hover:text-black transition-colors cursor-pointer uppercase"
+                >
+                  ← Barat (Kiri)
+                </button>
+                <button 
+                  @click="selectCategoryZone('cat2', 'east')"
+                  class="border border-white py-1 px-1 text-center hover:bg-white hover:text-black transition-colors cursor-pointer uppercase"
+                >
+                  Timur (Kanan) →
+                </button>
+                <button 
+                  @click="selectCategoryZone('cat2', 'back')"
+                  class="border border-white py-1 px-1 text-center hover:bg-white hover:text-black transition-colors cursor-pointer uppercase"
+                >
+                  ↓ Grandstand
+                </button>
+              </div>
+            </div>
 
             <div class="flex items-center justify-between mt-3 text-[10px] border-t border-current pt-2 uppercase">
               <span>Sisa Kuota: {{ ticketStore.stock[cat.key] }}</span>

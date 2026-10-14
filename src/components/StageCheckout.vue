@@ -75,6 +75,7 @@ function handleSimulatePayment() {
 
       authStore.addPurchasedTicket({
         orderId: ticketStore.issuedTicket?.orderId || 'ORD-9821-2026',
+        invoiceNo: ticketStore.paymentDetails?.invoiceNo || 'INV/2026/FT/982103',
         eventTitle: evt.title,
         venue: `${evt.venue}, ${evt.city}`,
         date: evt.date,
@@ -83,6 +84,9 @@ function handleSimulatePayment() {
         totalPaid: ticketStore.issuedTicket?.totalPaid || ticketStore.grandTotal,
         issuedAt: ticketStore.issuedTicket?.issuedAt || new Date().toLocaleString('id-ID'),
         paymentMethod: selectedChannel.value.name,
+        qty: ticketStore.quantity || 1,
+        seats: [...ticketStore.selectedSeats],
+        attendees: [...ticketStore.attendees],
       });
     } catch (e) {
       console.error('Payment confirmation error:', e);

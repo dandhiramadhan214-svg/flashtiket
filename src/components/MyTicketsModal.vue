@@ -96,29 +96,58 @@ async function handleDownloadTicketPdf(ticketItem) {
           v-else 
           v-for="t in authStore.currentUser.myTickets" 
           :key="t.orderId"
-          class="border-2 border-black p-5 space-y-4 bg-white transition-all hover:border-4"
+          class="border-2 border-black p-5 space-y-4 bg-white transition-colors hover:bg-[#FAFAFA]"
         >
           <div class="flex items-start justify-between">
             <div class="space-y-1">
-              <span class="text-[10px] font-bold uppercase tracking-wider bg-black text-white px-2 py-0.5">
-                {{ t.categoryName }}
-              </span>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-wider bg-black text-white px-2 py-0.5">
+                  {{ t.categoryName }}
+                </span>
+                <span v-if="t.qty && t.qty > 1" class="text-[10px] font-bold uppercase border border-black px-1.5 py-0.5 bg-[#F5F5F5]">
+                  {{ t.qty }} TIKET ROMBONGAN
+                </span>
+              </div>
               <h3 class="font-serif font-bold text-black text-lg mt-1">{{ t.eventTitle }}</h3>
               <p class="text-xs text-[#525252]">{{ t.venue }}</p>
             </div>
-            <span class="px-2 py-0.5 border border-black text-[10px] font-bold uppercase">
-              LUNAS
-            </span>
+            <div class="text-right">
+              <span class="px-2 py-0.5 bg-black text-white text-[10px] font-bold uppercase">
+                LUNAS (SETTLED)
+              </span>
+              <div class="text-[9px] text-[#525252] font-mono mt-1">{{ t.invoiceNo || 'INV/OFFICIAL' }}</div>
+            </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4 text-xs border border-black p-3 bg-[#F5F5F5]">
-            <div>
-              <span class="text-[#525252] block text-[10px] uppercase">ID ORDER</span>
-              <span class="font-bold text-black">{{ t.orderId }}</span>
+          <div class="space-y-2 text-xs border border-black p-3 bg-[#F5F5F5]">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <span class="text-[#525252] block text-[10px] uppercase">ID PEMESANAN</span>
+                <span class="font-bold text-black font-mono">{{ t.orderId }}</span>
+              </div>
+              <div>
+                <span class="text-[#525252] block text-[10px] uppercase">ALOKASI KURSI</span>
+                <span class="font-bold text-black font-mono">
+                  {{ t.seats && t.seats.length ? t.seats.join(', ') : t.seatNo }}
+                </span>
+              </div>
             </div>
-            <div>
-              <span class="text-[#525252] block text-[10px] uppercase">NOMOR KURSI</span>
-              <span class="font-bold text-black truncate block">{{ t.seatNo }}</span>
+
+            <!-- Attendee Friends List for Group Bookings -->
+            <div v-if="t.attendees && t.attendees.length > 1" class="pt-2 border-t border-[#E5E5E5] space-y-1">
+              <span class="text-[9px] text-[#525252] uppercase font-bold block">
+                Peserta Rombongan Terdaftar (1 Tiket 1 NIK):
+              </span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[10px]">
+                <div 
+                  v-for="att in t.attendees" 
+                  :key="att.index"
+                  class="bg-white border border-[#E5E5E5] px-2 py-1 flex justify-between"
+                >
+                  <span class="font-bold text-black">#{{ att.index }}. {{ att.name }}</span>
+                  <span class="font-mono text-[9px] text-[#525252]">{{ att.seat }}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -136,12 +165,12 @@ async function handleDownloadTicketPdf(ticketItem) {
                 <span v-else>Unduh PDF ↓</span>
               </button>
 
-              <!-- View QR code -->
+              <!-- View QR code & Nota -->
               <button 
                 @click="authStore.isMyTicketsOpen = false; queueStore.setStage('ticket');"
                 class="px-3 py-1.5 bg-black text-white border border-black text-xs font-bold hover:bg-white hover:text-black transition-colors cursor-pointer"
               >
-                Buka QR Pass →
+                Buka E-Tiket &amp; Nota →
               </button>
             </div>
           </div>
