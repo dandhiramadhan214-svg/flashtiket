@@ -210,12 +210,38 @@ function handleBackHome() {
           <!-- Customer Identity Box -->
           <div class="border-2 border-black p-4 flex items-center justify-between font-mono text-xs uppercase">
             <div>
-              <div class="text-[10px] text-[#525252]">Nama Pemegang:</div>
+              <div class="text-[10px] text-[#525252]">Nama Pemesan Utama:</div>
               <div class="font-bold text-sm text-black">{{ activeTicket.holderName }}</div>
             </div>
             <div class="text-right">
               <div class="text-[10px] text-[#525252]">Status:</div>
               <div class="font-bold text-black">[LUNAS / VERIFIED]</div>
+            </div>
+          </div>
+
+          <!-- Group Attendee Roster (1 Tiket 1 NIK) -->
+          <div v-if="activeTicket.attendees && activeTicket.attendees.length > 1" class="border border-black p-3 space-y-2 font-mono text-xs">
+            <div class="flex items-center justify-between border-b border-[#E5E5E5] pb-1.5">
+              <span class="font-bold text-[10px] uppercase text-black">
+                Daftar Rombongan Tiket (Anti-Calo Verified · {{ activeTicket.attendees.length }} Peserta)
+              </span>
+              <span class="text-[9px] bg-black text-white px-1.5 py-0.5 font-mono">1 TIKET 1 ID</span>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
+              <div 
+                v-for="att in activeTicket.attendees" 
+                :key="att.index"
+                class="border border-[#E5E5E5] bg-[#F9F9F9] p-2 text-[10px] flex flex-col justify-between"
+              >
+                <div class="flex justify-between font-bold text-black">
+                  <span>#{{ att.index }}. {{ att.name }}</span>
+                  <span class="font-mono text-[9px] border border-black px-1">{{ att.seat || ('Kursi ' + att.index) }}</span>
+                </div>
+                <div class="text-[#525252] text-[9px] mt-1 font-mono">
+                  NIK: {{ att.nik }}
+                </div>
+              </div>
             </div>
           </div>
 

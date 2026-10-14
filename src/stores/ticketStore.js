@@ -93,6 +93,38 @@ export const useTicketStore = defineStore('ticket', () => {
     email: 'kevin.pratama@war-tiket.com',
   });
 
+  // Anti-scalping multi-attendee records (1 Ticket = 1 Identity NIK)
+  const selectedSeats = ref(['VIP-A08']);
+  const attendees = ref([
+    { index: 1, name: 'Kevin Pratama', nik: '31710482910002', seat: 'VIP-A08' }
+  ]);
+
+  function syncAttendees() {
+    const qty = quantity.value;
+    while (attendees.value.length < qty) {
+      const idx = attendees.value.length + 1;
+      const assignedSeat = selectedSeats.value[idx - 1] || `${selectedCategory.value.toUpperCase()}-SEAT-${idx}`;
+      attendees.value.push({
+        index: idx,
+        name: `Teman / Peserta #${idx}`,
+        nik: `317104${Math.floor(10000000 + Math.random() * 90000000)}`,
+        seat: assignedSeat,
+      });
+    }
+    if (attendees.value.length > qty) {
+      attendees.value = attendees.value.slice(0, qty);
+    }
+  }
+
+  function setSelectedSeats(seatsArr) {
+    if (Array.isArray(seatsArr) && seatsArr.length > 0) {
+      selectedSeats.value = [...seatsArr];
+      quantity.value = seatsArr.length;
+      selectedSeatName.value = seatsArr.join(', ');
+      syncAttendees();
+    }
+  }
+
   const issuedTicket = ref(null);
 
   // Computed values
@@ -126,17 +158,25 @@ export const useTicketStore = defineStore('ticket', () => {
   }
 
   function incrementQty() {
-    if (quantity.value < 2) {
+    if (quantity.value < 10) {
       quantity.value++;
+      syncAttendees();
     } else {
-      alert('Sesuai ketentuan resmi, pembelian dibatasi maksimal 2 tiket per akun untuk mencegah calo.');
+      alert('Sesuai ketentuan batas reservasi rombongan, maksimal pemesanan adalah 10 tiket per transaksi.');
     }
   }
 
   function decrementQty() {
     if (quantity.value > 1) {
       quantity.value--;
+      syncAttendees();
     }
+  }
+
+  function setQuantity(qty) {
+    const validQty = Math.max(1, Math.min(10, qty));
+    quantity.value = validQty;
+    syncAttendees();
   }
 
   function lockTickets() {
@@ -212,6 +252,8 @@ export const useTicketStore = defineStore('ticket', () => {
       categoryName: categoryDetails[cat].name,
       qty: quantity.value,
       seatNo: `${selectedSeatName.value} (${selectedSeatZone.value})`,
+      seats: [...selectedSeats.value],
+      attendees: [...attendees.value],
       qrHash: `SECURE: #${Math.random().toString(36).substring(2, 10).toUpperCase()}-SHA256`,
       totalPaid: grandTotal.value,
       issuedAt: new Date().toLocaleDateString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
@@ -244,6 +286,10 @@ export const useTicketStore = defineStore('ticket', () => {
     stock.value = { ...evStock };
     quantity.value = 1;
     selectedCategory.value = 'cat1';
+    selectedSeats.value = ['VIP-A08'];
+    attendees.value = [
+      { index: 1, name: 'Kevin Pratama', nik: '31710482910002', seat: 'VIP-A08' }
+    ];
     currentOrderId.value = null;
     issuedTicket.value = null;
     if (lockTimerInterval) clearInterval(lockTimerInterval);
@@ -260,7 +306,12 @@ export const useTicketStore = defineStore('ticket', () => {
     selectedSeatName,
     selectedSeatZone,
     setSelectedSeat,
+    selectedSeats,
+    setSelectedSeats,
+    attendees,
+    syncAttendees,
     quantity,
+    setQuantity,
     currentOrderId,
     lockTimeRemaining,
     lockTimerFormatted,

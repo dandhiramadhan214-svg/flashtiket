@@ -177,6 +177,62 @@ function handleCancel() {
               />
             </div>
           </div>
+
+          <!-- Multi-Attendee Friends Form (Anti-Scalping 1 Tiket 1 NIK) -->
+          <div v-if="ticketStore.quantity > 1" class="border-t-2 border-black pt-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-serif font-bold text-base text-black flex items-center gap-2">
+                  <span>Data Teman Rombongan (Tiket #2 - #{{ ticketStore.quantity }})</span>
+                </div>
+                <div class="text-[10px] text-[#525252] mt-0.5">
+                  🛡️ Aturan Anti-Calo Resmi: Tiap lembar tiket terikat dengan nama &amp; NIK KTP teman.
+                </div>
+              </div>
+              <span class="border border-black px-2 py-0.5 text-[10px] font-bold bg-black text-white">
+                {{ ticketStore.quantity - 1 }} TEMAN
+              </span>
+            </div>
+
+            <!-- Dynamic Form for each friend -->
+            <div class="space-y-4 max-h-80 overflow-y-auto pr-1">
+              <div 
+                v-for="(att, idx) in ticketStore.attendees.slice(1)" 
+                :key="att.index"
+                class="border border-black p-3 bg-[#F9F9F9] space-y-3"
+              >
+                <div class="flex items-center justify-between text-[11px] font-bold border-b border-[#E5E5E5] pb-1">
+                  <span>TIKET #{{ att.index }} (KURSI: {{ ticketStore.selectedSeats[att.index - 1] || 'FESTIVAL' }})</span>
+                  <span class="text-[10px] text-[#525252]">TERVERIFIKASI ID</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-[9px] uppercase tracking-wider text-[#525252] mb-0.5">
+                      Nama Teman #{{ att.index }}
+                    </label>
+                    <input 
+                      v-model="att.name"
+                      type="text" 
+                      placeholder="Nama Lengkap KTP"
+                      class="w-full bg-transparent border-b border-black py-1 text-xs text-black font-serif focus:border-b-2 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-[9px] uppercase tracking-wider text-[#525252] mb-0.5">
+                      NIK KTP Teman #{{ att.index }}
+                    </label>
+                    <input 
+                      v-model="att.nik"
+                      type="text" 
+                      placeholder="3171xxxxxxxxxxxx"
+                      class="w-full bg-transparent border-b border-black py-1 text-xs text-black font-mono focus:border-b-2 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Payment Method Selector (Sharp Monochrome) -->
