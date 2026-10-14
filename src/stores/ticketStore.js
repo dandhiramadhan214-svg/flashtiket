@@ -246,7 +246,7 @@ export const useTicketStore = defineStore('ticket', () => {
     alert(`Waktu pemesanan Anda telah berakhir (10 Menit). Kursi otomatis dikembalikan ke ketersediaan umum.`);
   }
 
-  function confirmPayment() {
+  function confirmPayment(methodName, accNumber) {
     if (lockTimerInterval) clearInterval(lockTimerInterval);
 
     const orderId = currentOrderId.value;
