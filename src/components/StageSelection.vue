@@ -14,7 +14,7 @@ const currentEvent = computed(() => eventsStore.selectedEvent);
 const selectedSeatsList = ref(['VIP-A08']);
 const hoveredSeat = ref(null);
 
-// VIP Seat dots (4 rows x 14 seats) - Elevated behind Standing
+// VIP Seat dots (4 rows x 14 seats) - Premium front closest to stage
 const vipSeats = computed(() => {
   const list = [];
   const rows = ['A', 'B', 'C', 'D'];
@@ -34,7 +34,7 @@ const vipSeats = computed(() => {
         row: rows[r],
         num: c,
         x: 236 + (c - 1) * 22,
-        y: 280 + r * 16,
+        y: 175 + r * 16,
         isBooked,
         isSelected,
       });
@@ -226,9 +226,9 @@ function handleLock() {
 }
 
 const cats = [
-  { key: 'vip', label: 'VIP Royal Floor (Seated)', color: '#F59E0B', desc: 'Kursi berpenomoran barisan depan + soundcheck pass eksklusif.' },
-  { key: 'cat1', label: 'CAT 1 Standing Festival', color: '#06B6D4', desc: 'Area festival berdiri tepat di depan panggung & catwalk.' },
-  { key: 'cat2', label: 'CAT 2 Reserved Tribune', color: '#8B5CF6', desc: 'Tribun grandstand bernomor pandangan panoramik panggung.' },
+  { key: 'vip', label: 'VIP Royal Floor (Seated)', color: '#F59E0B', desc: 'Kursi duduk premium baris terdepan, paling dekat panggung. Termasuk soundcheck pass eksklusif.' },
+  { key: 'cat1', label: 'CAT 1 Standing Festival', color: '#06B6D4', desc: 'Area berdiri bebas (general pit) di tengah, tepat di belakang VIP dan dekat catwalk.' },
+  { key: 'cat2', label: 'CAT 2 Reserved Tribune', color: '#8B5CF6', desc: 'Tribun bernomor di sisi kiri, kanan, dan belakang. Pandangan panoramik panggung.' },
 ];
 </script>
 
@@ -289,44 +289,25 @@ const cats = [
             <!-- PANGGUNG UTAMA (MAIN STAGE) -->
             <g class="cursor-pointer" @click="selectCategoryZone('vip')">
               <rect x="250" y="20" width="260" height="48" fill="#FFFFFF" stroke="#F59E0B" stroke-width="2" />
-              <text x="380" y="44" fill="#000000" font-size="12" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle" letter-spacing="2">
+              <text x="380" y="44" fill="#000000" font-size="12" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle" letter-spacing="2" pointer-events="none">
                 PANGGUNG UTAMA
               </text>
-              <text x="380" y="58" fill="#000000" font-size="8" font-family="'JetBrains Mono', monospace" font-weight="700" text-anchor="middle">
+              <text x="380" y="58" fill="#000000" font-size="8" font-family="'JetBrains Mono', monospace" font-weight="700" text-anchor="middle" pointer-events="none">
                 MAIN PERFORMANCE STAGE
               </text>
 
               <!-- Runway / Catwalk -->
               <rect x="358" y="68" width="44" height="60" fill="#FFFFFF" stroke="#000000" stroke-width="1" />
               <circle cx="380" cy="132" r="16" fill="#F59E0B" stroke="#000000" stroke-width="1" />
-              <text x="380" y="136" fill="#000000" font-size="7" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle">CATWALK</text>
+              <text x="380" y="136" fill="#000000" font-size="7" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle" pointer-events="none">CATWALK</text>
             </g>
 
-            <!-- 1. CAT 1 FESTIVAL STANDING (CYAN ZONE #06B6D4) - FRONT PIT TOUCHING CATWALK -->
-            <g class="cursor-pointer" @click="selectCategoryZone('cat1')">
-              <rect x="180" y="150" width="400" height="85" 
-                fill="#06b6d418" 
-                :stroke="ticketStore.selectedCategory === 'cat1' ? '#06B6D4' : '#0891b2'" 
-                stroke-width="2" 
-                :stroke-dasharray="ticketStore.selectedCategory === 'cat1' ? 'none' : '5 3'" 
-              />
-              
-              <text x="380" y="185" 
-                fill="#06B6D4" 
-                font-size="11" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle" letter-spacing="1.5">
-                CAT 1: FESTIVAL STANDING (DEPAN PANGGUNG) · CYAN
-              </text>
-              <text x="380" y="205" fill="#67e8f9" font-size="8.5" font-family="'JetBrains Mono', monospace" text-anchor="middle">
-                Area Berdiri Bebas · Paling Dekat Panggung &amp; Barikade Catwalk
-              </text>
-            </g>
-
-            <!-- 2. VIP ROYAL FLOOR (GOLD ZONE #F59E0B) - ELEVATED SEATED SECTION BEHIND STANDING -->
+            <!-- 1. VIP ROYAL FLOOR (GOLD ZONE #F59E0B) - PREMIUM FRONT ROW CLOSEST TO STAGE -->
             <g>
-              <rect x="220" y="250" width="320" height="98" fill="#f59e0b0c" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" />
+              <rect x="220" y="150" width="320" height="100" fill="#f59e0b0c" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4 4" />
               
-              <text x="380" y="268" fill="#F59E0B" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle" letter-spacing="1">
-                VIP ROYAL FLOOR (SEATED) · EMAS (TRIBUN TENGAH)
+              <text x="380" y="168" fill="#F59E0B" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle" letter-spacing="1" pointer-events="none">
+                VIP ROYAL FLOOR (SEATED) · EMAS · BARIS TERDEPAN
               </text>
 
               <g v-for="seat in vipSeats" :key="seat.id">
@@ -337,7 +318,7 @@ const cats = [
                   :fill="seat.isBooked ? '#222222' : (seat.isSelected ? '#FFFFFF' : '#F59E0B')"
                   :stroke="seat.isSelected ? '#F59E0B' : 'none'"
                   :stroke-width="seat.isSelected ? 2.5 : 0"
-                  :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer transition-transform duration-100 hover:scale-125'"
+                  :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer hover:opacity-60'"
                   @mouseenter="!seat.isBooked && (hoveredSeat = seat.id)"
                   @mouseleave="hoveredSeat === seat.id && (hoveredSeat = null)"
                   @click="selectIndividualSeat(seat)"
@@ -345,9 +326,28 @@ const cats = [
               </g>
             </g>
 
+            <!-- 2. CAT 1 FESTIVAL STANDING (CYAN ZONE #06B6D4) - GENERAL PIT BEHIND VIP -->
+            <g class="cursor-pointer" @click="selectCategoryZone('cat1')">
+              <rect x="180" y="260" width="400" height="80" 
+                fill="#06b6d418" 
+                :stroke="ticketStore.selectedCategory === 'cat1' ? '#06B6D4' : '#0891b2'" 
+                stroke-width="2" 
+                :stroke-dasharray="ticketStore.selectedCategory === 'cat1' ? 'none' : '5 3'" 
+              />
+              
+              <text x="380" y="295" 
+                fill="#06B6D4" 
+                font-size="11" font-family="'JetBrains Mono', monospace" font-weight="900" text-anchor="middle" letter-spacing="1.5" pointer-events="none">
+                CAT 1: FESTIVAL STANDING AREA · CYAN
+              </text>
+              <text x="380" y="315" fill="#67e8f9" font-size="8.5" font-family="'JetBrains Mono', monospace" text-anchor="middle" pointer-events="none">
+                Area Berdiri Bebas · Dekat Panggung &amp; Catwalk
+              </text>
+            </g>
+
             <!-- 3. CAT 2 TRIBUN TIMUR & BARAT (PURPLE ZONE #8B5CF6) - CLICKABLE ZONES -->
             <g class="cursor-pointer" @click="selectCategoryZone('cat2', 'west')">
-              <text x="95" y="152" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800">
+              <text x="95" y="152" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800" pointer-events="none">
                 ← TRIBUN BARAT (KIRI)
               </text>
               <g v-for="seat in tribuneLeftSeats" :key="seat.id">
@@ -358,7 +358,7 @@ const cats = [
                   :fill="seat.isBooked ? '#222222' : (seat.isSelected ? '#FFFFFF' : '#8B5CF6')"
                   :stroke="seat.isSelected ? '#8B5CF6' : 'none'"
                   :stroke-width="seat.isSelected ? 2.5 : 0"
-                  :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer transition-transform duration-100 hover:scale-125'"
+                  :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer hover:opacity-60'"
                   @mouseenter="!seat.isBooked && (hoveredSeat = seat.id)"
                   @mouseleave="hoveredSeat === seat.id && (hoveredSeat = null)"
                   @click.stop="selectIndividualSeat(seat)"
@@ -367,7 +367,7 @@ const cats = [
             </g>
 
             <g class="cursor-pointer" @click="selectCategoryZone('cat2', 'east')">
-              <text x="610" y="152" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800">
+              <text x="610" y="152" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800" pointer-events="none">
                 TRIBUN TIMUR (KANAN) →
               </text>
               <g v-for="seat in tribuneRightSeats" :key="seat.id">
@@ -378,7 +378,7 @@ const cats = [
                   :fill="seat.isBooked ? '#222222' : (seat.isSelected ? '#FFFFFF' : '#8B5CF6')"
                   :stroke="seat.isSelected ? '#8B5CF6' : 'none'"
                   :stroke-width="seat.isSelected ? 2.5 : 0"
-                  :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer transition-transform duration-100 hover:scale-125'"
+                  :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer hover:opacity-60'"
                   @mouseenter="!seat.isBooked && (hoveredSeat = seat.id)"
                   @mouseleave="hoveredSeat === seat.id && (hoveredSeat = null)"
                   @click.stop="selectIndividualSeat(seat)"
@@ -389,7 +389,7 @@ const cats = [
             <!-- 4. CAT 2 TRIBUN UTAMA GRANDSTAND (PURPLE ZONE #8B5CF6) -->
             <g class="cursor-pointer" @click="selectCategoryZone('cat2', 'back')">
               <rect x="150" y="360" width="460" height="98" fill="#8b5cf60a" stroke="#8B5CF6" stroke-width="1.5" stroke-dasharray="4 4" />
-              <text x="380" y="380" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800" text-anchor="middle">
+              <text x="380" y="380" fill="#8B5CF6" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="800" text-anchor="middle" pointer-events="none">
                 TRIBUN UTAMA GRANDSTAND (CAT 2) · UNGU
               </text>
 
@@ -401,7 +401,7 @@ const cats = [
                   :fill="seat.isBooked ? '#222222' : (seat.isSelected ? '#FFFFFF' : '#8B5CF6')"
                   :stroke="seat.isSelected ? '#8B5CF6' : 'none'"
                   :stroke-width="seat.isSelected ? 2.5 : 0"
-                  :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer transition-transform duration-100 hover:scale-125'"
+                  :class="seat.isBooked ? 'cursor-not-allowed opacity-30' : 'cursor-pointer hover:opacity-60'"
                   @mouseenter="!seat.isBooked && (hoveredSeat = seat.id)"
                   @mouseleave="hoveredSeat === seat.id && (hoveredSeat = null)"
                   @click.stop="selectIndividualSeat(seat)"
@@ -422,16 +422,16 @@ const cats = [
         <!-- Official Concert Color Legend Bar -->
         <div class="flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] text-[#525252] pt-3 border-t border-black uppercase">
           <div class="flex items-center gap-1.5">
-            <span class="w-3.5 h-3.5 bg-[#06B6D4] inline-block border border-black"></span>
-            <span class="text-black font-bold">CAT 1 Standing (Depan)</span>
+            <span class="w-3.5 h-3.5 bg-[#F59E0B] inline-block border border-black"></span>
+            <span class="text-black font-bold">VIP Seated (Depan)</span>
           </div>
           <div class="flex items-center gap-1.5">
-            <span class="w-3.5 h-3.5 bg-[#F59E0B] inline-block border border-black"></span>
-            <span class="text-black font-bold">VIP Seated (Tengah)</span>
+            <span class="w-3.5 h-3.5 bg-[#06B6D4] inline-block border border-black"></span>
+            <span class="text-black font-bold">CAT 1 Standing (Tengah)</span>
           </div>
           <div class="flex items-center gap-1.5">
             <span class="w-3.5 h-3.5 bg-[#8B5CF6] inline-block border border-black"></span>
-            <span class="text-black font-bold">CAT 2 Tribun (Kiri/Kanan/Bawah)</span>
+            <span class="text-black font-bold">CAT 2 Tribun (Samping/Belakang)</span>
           </div>
           <div class="flex items-center gap-1.5">
             <span class="w-3.5 h-3.5 bg-white border-2 border-black inline-block"></span>
