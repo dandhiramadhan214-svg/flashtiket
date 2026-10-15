@@ -36,6 +36,8 @@ onMounted(async () => {
     ticketStore.customer.email = authStore.currentUser.email;
     ticketStore.customer.phone = authStore.currentUser.phone;
     ticketStore.customer.nik = authStore.currentUser.nik;
+  } else {
+    authStore.openLogin();
   }
   paymentStore.loadSnapJS();
 });

@@ -3,11 +3,28 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useQueueStore } from '../stores/queueStore';
 import { useTicketStore } from '../stores/ticketStore';
 import { useEventsStore } from '../stores/eventsStore';
+import { useAuthStore } from '../stores/authStore';
+import { useNotifStore } from '../stores/notifStore';
 import SvgIcon from './SvgIcon.vue';
 
 const queueStore = useQueueStore();
 const ticketStore = useTicketStore();
 const eventsStore = useEventsStore();
+const authStore = useAuthStore();
+const notifStore = useNotifStore();
+
+function handleEnterQueue() {
+  if (!authStore.isLoggedIn) {
+    notifStore.push(
+      'warning',
+      'Wajib Punya Akun',
+      'Anda harus memiliki akun dan masuk (login) terlebih dahulu sebelum dapat mengikuti antrean tiket!'
+    );
+    authStore.openLogin();
+    return;
+  }
+  queueStore.startQueue();
+}
 
 const currentEvent = computed(() => eventsStore.selectedEvent);
 
@@ -125,12 +142,19 @@ const tierCategories = computed(() => [
       </p>
 
       <div>
-        <button
-          @click="queueStore.startQueue()"
-          class="btn-mono-primary text-sm px-10 py-4"
-        >
-          <span>Masuk Ruang Antrean Sekarang →</span>
-        </button>
+        <div v-if="!authStore.isLoggedIn" class="mb-4 inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-300 text-amber-900 text-xs font-mono">
+          <span>⚠️</span>
+          <span>Harus memiliki akun terdaftar sebelum dapat mengikuti antrean pembelian tiket.</span>
+        </div>
+        <div>
+          <button
+            @click="handleEnterQueue()"
+            class="btn-mono-primary text-sm px-10 py-4 cursor-pointer"
+          >
+            <span v-if="!authStore.isLoggedIn">🔒 Masuk / Buat Akun untuk Ikut Antrean →</span>
+            <span v-else>Masuk Ruang Antrean Sekarang →</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -161,10 +185,21 @@ const tierCategories = computed(() => [
       <div class="md:col-span-5 border-2 border-black p-6 sm:p-8 space-y-6">
         <div class="flex items-center justify-between border-b border-black pb-3">
           <h2 class="font-serif font-bold text-lg text-black">Verifikasi Akun</h2>
-          <span class="font-mono text-xs font-bold">[4/4 LENGKAP]</span>
+          <span class="font-mono text-xs font-bold" :class="authStore.isLoggedIn ? 'text-emerald-600' : 'text-amber-600'">
+            [{{ authStore.isLoggedIn ? 'TERVERIFIKASI' : 'BELUM LOGIN' }}]
+          </span>
         </div>
         <div class="space-y-3 font-mono text-xs uppercase">
-          <div v-for="item in ['Akun Terverifikasi', 'Nomor KTP/NIK Valid', 'Koneksi Browser Stabil', 'Virtual Account Siap']" :key="item"
+          <div 
+            class="flex items-center justify-between p-3 border border-black"
+            :class="authStore.isLoggedIn ? 'bg-white' : 'bg-amber-50'"
+          >
+            <span>Status Akun</span>
+            <span class="font-bold" :class="authStore.isLoggedIn ? 'text-emerald-600' : 'text-amber-600'">
+              {{ authStore.isLoggedIn ? '✓ AKTIF (' + authStore.currentUser.name + ')' : '⚠ BELUM LOGIN' }}
+            </span>
+          </div>
+          <div v-for="item in ['Nomor KTP/NIK Valid', 'Koneksi Browser Stabil', 'Virtual Account Siap']" :key="item"
             class="flex items-center justify-between p-3 border border-black bg-white">
             <span>{{ item }}</span>
             <span class="font-bold">✓ READY</span>

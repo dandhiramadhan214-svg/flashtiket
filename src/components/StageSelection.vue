@@ -3,10 +3,14 @@ import { ref, computed, watch } from 'vue';
 import { useTicketStore } from '../stores/ticketStore';
 import { useQueueStore } from '../stores/queueStore';
 import { useEventsStore } from '../stores/eventsStore';
+import { useAuthStore } from '../stores/authStore';
+import { useNotifStore } from '../stores/notifStore';
 
 const ticketStore = useTicketStore();
 const queueStore = useQueueStore();
 const eventsStore = useEventsStore();
+const authStore = useAuthStore();
+const notifStore = useNotifStore();
 
 const currentEvent = computed(() => eventsStore.selectedEvent);
 
@@ -226,6 +230,16 @@ function handleDecrement() {
 }
 
 function handleLock() {
+  if (!authStore.isLoggedIn) {
+    notifStore.push(
+      'warning',
+      'Wajib Punya Akun',
+      'Anda harus memiliki akun dan masuk (login) terlebih dahulu sebelum dapat memesan tiket!'
+    );
+    authStore.openLogin();
+    return;
+  }
+
   const seatSummary = ticketStore.selectedCategory === 'cat1'
     ? `CAT 1 Festival Standing (${ticketStore.quantity} Tiket)`
     : `${selectedSeatsList.value.join(', ')} (${ticketStore.quantity} Kursi)`;
@@ -607,11 +621,17 @@ const cats = [
           </div>
 
           <!-- Lock Button CTA -->
+          <div v-if="!authStore.isLoggedIn" class="p-3 bg-amber-50 border border-amber-300 text-amber-900 text-xs font-mono flex items-center gap-2">
+            <span class="text-base">⚠️</span>
+            <span>Anda belum masuk. Silakan buat akun atau masuk terlebih dahulu untuk memesan tiket.</span>
+          </div>
+
           <button
             @click="handleLock()"
-            class="btn-mono-primary w-full py-4 text-center text-xs cursor-pointer"
+            class="btn-mono-primary w-full py-4 text-center text-xs cursor-pointer flex items-center justify-center gap-2"
           >
-            <span>Kunci {{ ticketStore.quantity }} Kursi &amp; Lanjut Form NIK →</span>
+            <span v-if="!authStore.isLoggedIn">🔒 Masuk / Buat Akun untuk Pesan Tiket →</span>
+            <span v-else>Kunci {{ ticketStore.quantity }} Kursi &amp; Lanjut Form NIK →</span>
           </button>
         </div>
       </div>

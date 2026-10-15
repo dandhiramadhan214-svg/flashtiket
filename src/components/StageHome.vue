@@ -6,6 +6,7 @@ import { useTicketStore } from '../stores/ticketStore';
 import { useWishlistStore } from '../stores/wishlistStore';
 import { useNotifStore } from '../stores/notifStore';
 import { useReviewStore } from '../stores/reviewStore';
+import { useAuthStore } from '../stores/authStore';
 import SvgIcon from './SvgIcon.vue';
 
 const eventsStore = useEventsStore();
@@ -14,6 +15,7 @@ const ticketStore = useTicketStore();
 const wishlistStore = useWishlistStore();
 const notifStore = useNotifStore();
 const reviewStore = useReviewStore();
+const authStore = useAuthStore();
 
 function handleEventClick(event) {
   if (event.status === 'ended') {
@@ -28,6 +30,19 @@ function handleEventClick(event) {
     notifStore.push('info', 'Segera Dibuka', `Tiket "${event.title}" akan segera dibuka.`);
     return;
   }
+
+  // Ensure user is logged in before booking
+  if (!authStore.isLoggedIn) {
+    eventsStore.selectEvent(event.id);
+    notifStore.push(
+      'warning',
+      'Wajib Punya Akun',
+      'Anda harus memiliki akun dan masuk (login) terlebih dahulu sebelum dapat memesan tiket!'
+    );
+    authStore.openLogin();
+    return;
+  }
+
   eventsStore.selectEvent(event.id);
   ticketStore.resetAll();
   queueStore.setStage('lobby');
