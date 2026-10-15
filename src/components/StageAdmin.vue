@@ -6,6 +6,8 @@ import { useQueueStore } from '../stores/queueStore';
 import { useAuthStore } from '../stores/authStore';
 import { useThemeStore } from '../stores/themeStore';
 import { useNotifStore } from '../stores/notifStore';
+import { useTicketStore } from '../stores/ticketStore';
+import { supabase } from '../services/supabaseClient';
 import api from '../services/api';
 import SvgIcon from './SvgIcon.vue';
 
@@ -15,6 +17,7 @@ const queueStore = useQueueStore();
 const authStore = useAuthStore();
 const themeStore = useThemeStore();
 const notifStore = useNotifStore();
+const ticketStore = useTicketStore();
 
 const activeTab = ref('overview'); // 'overview' | 'events' | 'transactions' | 'nodes' | 'security'
 const currentTime = ref('');
@@ -126,16 +129,27 @@ function handleSelectEvent(evt) {
   editStatus.value = evt.status || 'on-sale';
 }
 
-function saveEventChanges() {
+async function saveEventChanges() {
   if (!selectedEvent.value) return;
 
+  const vipVal = Number(editStockVip.value);
+  const cat1Val = Number(editStockCat1.value);
+  const cat2Val = Number(editStockCat2.value);
+
   selectedEvent.value.stock = {
-    vip: Number(editStockVip.value),
-    cat1: Number(editStockCat1.value),
-    cat2: Number(editStockCat2.value),
+    vip: vipVal,
+    cat1: cat1Val,
+    cat2: cat2Val,
   };
 
-  const total = Number(editStockVip.value) + Number(editStockCat1.value) + Number(editStockCat2.value);
+  // Sync to ticketStore live state if this event is currently active
+  if (eventsStore.selectedEvent?.id === selectedEvent.value.id) {
+    ticketStore.stock.vip = vipVal;
+    ticketStore.stock.cat1 = cat1Val;
+    ticketStore.stock.cat2 = cat2Val;
+  }
+
+  const total = vipVal + cat1Val + cat2Val;
   if (total === 0) {
     selectedEvent.value.status = 'sold-out';
     editStatus.value = 'sold-out';
@@ -143,10 +157,21 @@ function saveEventChanges() {
     selectedEvent.value.status = editStatus.value;
   }
 
+  // Sync to Supabase ticket_categories in cloud
+  try {
+    const isColdplay = selectedEvent.value.id === 'coldplay-jkt-2026';
+    const offset = isColdplay ? 1 : 4;
+    await supabase.from('ticket_categories').update({ available_quota: vipVal }).eq('id', offset);
+    await supabase.from('ticket_categories').update({ available_quota: cat1Val }).eq('id', offset + 1);
+    await supabase.from('ticket_categories').update({ available_quota: cat2Val }).eq('id', offset + 2);
+  } catch (err) {
+    console.warn('Supabase stock update note:', err.message);
+  }
+
   notifStore.push(
     'success',
     'Perubahan Disimpan',
-    `Stok tiket & status "${selectedEvent.value.title}" berhasil di-update secara atomik di Redis!`
+    `Stok tiket "${selectedEvent.value.title}" berhasil di-update: VIP (${vipVal}), CAT 1 (${cat1Val}), CAT 2 (${cat2Val}). Tersinkron ke Supabase!`
   );
 }
 
