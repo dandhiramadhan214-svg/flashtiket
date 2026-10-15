@@ -241,6 +241,12 @@ export const useEventsStore = defineStore('events', () => {
     return gradients[index % gradients.length];
   }
 
+  function addEvent(eventData) {
+    if (eventData) {
+      events.value.unshift(eventData);
+    }
+  }
+
   return {
     searchQuery,
     activeCategory,
@@ -251,6 +257,7 @@ export const useEventsStore = defineStore('events', () => {
     filteredEvents,
     hotEvents,
     selectEvent,
+    addEvent,
     formatPrice,
     categoryColor,
     eventGradient,

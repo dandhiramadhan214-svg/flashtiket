@@ -120,13 +120,89 @@ const editStockCat2 = ref(selectedEvent.value?.stock?.cat2 ?? 300);
 const editPriceVip = ref((selectedEvent.value?.prices?.vip ?? selectedEvent.value?.price) || 500000);
 const editStatus = ref(selectedEvent.value?.status || 'on-sale');
 
-function handleSelectEvent(evt) {
-  selectedEvent.value = evt;
-  editStockVip.value = evt.stock?.vip ?? 0;
-  editStockCat1.value = evt.stock?.cat1 ?? 0;
-  editStockCat2.value = evt.stock?.cat2 ?? 0;
-  editPriceVip.value = evt.prices?.vip ?? evt.price ?? 500000;
-  editStatus.value = evt.status || 'on-sale';
+// New Event Creation Modal State
+const isAddEventModalOpen = ref(false);
+const newEventTitle = ref('');
+const newEventArtist = ref('');
+const newEventCategory = ref('Konser');
+const newEventCity = ref('Jakarta');
+const newEventVenue = ref('Stadion Utama Gelora Bung Karno');
+const newEventDate = ref('2026-11-28');
+const newEventTime = ref('19:00 WIB');
+const newEventPrice = ref(750000);
+const newStockVip = ref(100);
+const newStockCat1 = ref(500);
+const newStockCat2 = ref(1000);
+const isCreatingEvent = ref(false);
+
+async function handleCreateEvent() {
+  if (!newEventTitle.value.trim()) {
+    notifStore.push('error', 'Gagal', 'Nama konser/acara tidak boleh kosong.');
+    return;
+  }
+
+  isCreatingEvent.value = true;
+  try {
+    const vipVal = Number(newStockVip.value) || 0;
+    const cat1Val = Number(newStockCat1.value) || 0;
+    const cat2Val = Number(newStockCat2.value) || 0;
+    const totalQ = vipVal + cat1Val + cat2Val;
+
+    const newEvt = {
+      id: `evt-${Date.now()}`,
+      title: newEventTitle.value.trim(),
+      subtitle: newEventArtist.value.trim() ? `${newEventArtist.value.trim()} Live Concert 2026` : 'Official Concert 2026',
+      venue: newEventVenue.value.trim() || 'Stadion Utama GBK',
+      city: newEventCity.value.trim() || 'Jakarta',
+      date: newEventDate.value || '2026-11-28',
+      time: newEventTime.value || '19:00 WIB',
+      category: newEventCategory.value || 'Konser',
+      priceFrom: Number(newEventPrice.value) || 500000,
+      currency: 'IDR',
+      status: 'on-sale',
+      image: '/banner.jpg',
+      hot: true,
+      stock: {
+        vip: vipVal,
+        cat1: cat1Val,
+        cat2: cat2Val,
+      },
+    };
+
+    // 1. Add to eventsStore
+    eventsStore.addEvent(newEvt);
+
+    // 2. Select this event immediately in admin
+    handleSelectEvent(newEvt);
+
+    // 3. Sync to Supabase events table
+    try {
+      await supabase.from('events').insert({
+        title: newEvt.title,
+        description: newEvt.subtitle,
+        venue: newEvt.venue,
+        city: newEvt.city,
+        date: newEvt.date,
+        status: 'on-sale',
+        base_price: newEvt.priceFrom,
+        total_quota: totalQ,
+        available_quota: totalQ,
+      });
+    } catch (sbErr) {
+      console.warn('Supabase new event insert note:', sbErr.message);
+    }
+
+    isAddEventModalOpen.value = false;
+    notifStore.push('success', 'Acara Baru Diterbitkan!', `Konser "${newEvt.title}" berhasil dibuat dan siap dijual!`);
+
+    // Reset form
+    newEventTitle.value = '';
+    newEventArtist.value = '';
+  } catch (err) {
+    notifStore.push('error', 'Gagal', 'Terjadi kendala saat menambahkan acara baru.');
+  } finally {
+    isCreatingEvent.value = false;
+  }
 }
 
 async function saveEventChanges() {
@@ -606,9 +682,20 @@ onBeforeUnmount(() => {
           
           <!-- Event Pick List -->
           <div class="p-5 rounded-3xl bg-slate-950 border border-slate-800 shadow-xl space-y-3">
-            <div class="flex items-center justify-between">
-              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Daftar Konser &amp; Acara</h3>
-              <span class="text-xs font-bold text-sky-400">{{ eventsStore.events.length }} Acara</span>
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Daftar Konser &amp; Acara</h3>
+                <span class="text-[11px] font-bold text-sky-400">{{ eventsStore.events.length }} Acara Aktif</span>
+              </div>
+              <button 
+                @click="isAddEventModalOpen = true"
+                class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>+ Tambah Acara</span>
+              </button>
             </div>
 
             <div class="space-y-2 max-h-[520px] overflow-y-auto pr-1">
@@ -1021,6 +1108,200 @@ onBeforeUnmount(() => {
       </section>
 
     </main>
+
+    <!-- ════════════════════ MODAL: TAMBAH ACARA / KONSER BARU ════════════════════ -->
+    <div 
+      v-if="isAddEventModalOpen" 
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto"
+      @click.self="isAddEventModalOpen = false"
+    >
+      <div class="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 my-8 animate-in fade-in zoom-in-95 duration-200">
+        
+        <!-- Header -->
+        <div class="flex items-start justify-between border-b border-slate-800 pb-4">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-black tracking-wider uppercase mb-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Admin Event Publisher
+            </div>
+            <h3 class="text-xl font-black text-white">Buat Konser &amp; Acara Baru</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Daftarkan acara baru ke katalog tiket publik dan alokasikan kuota Redis realtime.</p>
+          </div>
+          <button 
+            @click="isAddEventModalOpen = false"
+            class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Form Body -->
+        <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+          
+          <!-- Row 1: Title & Artist -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">Nama Acara / Konser <span class="text-rose-400">*</span></label>
+              <input 
+                v-model="newEventTitle"
+                type="text" 
+                placeholder="cth: Bruno Mars 24K Magic Tour" 
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">Artis / Lineup Utama</label>
+              <input 
+                v-model="newEventArtist"
+                type="text" 
+                placeholder="cth: Bruno Mars" 
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
+              />
+            </div>
+          </div>
+
+          <!-- Row 2: Category & City -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">Kategori Acara</label>
+              <select 
+                v-model="newEventCategory"
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
+              >
+                <option value="Konser">Konser Musik</option>
+                <option value="Festival">Festival</option>
+                <option value="Olahraga">Olahraga &amp; Marathon</option>
+                <option value="Teater">Teater &amp; Seni</option>
+                <option value="Seminar">Seminar &amp; Expo</option>
+              </select>
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">Kota Penyelenggaraan</label>
+              <input 
+                v-model="newEventCity"
+                type="text" 
+                placeholder="cth: Jakarta" 
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
+              />
+            </div>
+          </div>
+
+          <!-- Row 3: Venue & Date -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">Lokasi / Venue</label>
+              <input 
+                v-model="newEventVenue"
+                type="text" 
+                placeholder="cth: Jakarta International Stadium (JIS)" 
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">Tanggal Pelaksanaan</label>
+              <input 
+                v-model="newEventDate"
+                type="date" 
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
+              />
+            </div>
+          </div>
+
+          <!-- Row 4: Time & Base Price -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">Waktu / Jam Mulai</label>
+              <input 
+                v-model="newEventTime"
+                type="text" 
+                placeholder="cth: 19:30 WIB" 
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-medium"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-300">Harga Tiket Termurah (IDR)</label>
+              <input 
+                v-model.number="newEventPrice"
+                type="number" 
+                placeholder="cth: 750000" 
+                step="50000"
+                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all font-mono font-bold"
+              />
+            </div>
+          </div>
+
+          <!-- Kuota Section -->
+          <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                </svg>
+                Alokasi Kuota Tiket (Redis In-Memory)
+              </span>
+              <span class="text-xs font-extrabold text-white font-mono">
+                Total: {{ (Number(newStockVip) || 0) + (Number(newStockCat1) || 0) + (Number(newStockCat2) || 0) }} Kursi
+              </span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+              <div class="space-y-1">
+                <label class="text-[11px] font-bold text-amber-400">VIP</label>
+                <input 
+                  v-model.number="newStockVip" 
+                  type="number" 
+                  min="0" 
+                  class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white text-center focus:outline-none focus:border-amber-400"
+                />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[11px] font-bold text-sky-400">CAT 1</label>
+                <input 
+                  v-model.number="newStockCat1" 
+                  type="number" 
+                  min="0" 
+                  class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white text-center focus:outline-none focus:border-sky-400"
+                />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[11px] font-bold text-purple-400">CAT 2</label>
+                <input 
+                  v-model.number="newStockCat2" 
+                  type="number" 
+                  min="0" 
+                  class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white text-center focus:outline-none focus:border-purple-400"
+                />
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
+          <button 
+            @click="isAddEventModalOpen = false"
+            type="button"
+            class="px-5 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-xs font-bold transition-all cursor-pointer"
+          >
+            Batal
+          </button>
+          <button 
+            @click="handleCreateEvent"
+            :disabled="isCreatingEvent || !newEventTitle"
+            type="button"
+            class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 text-xs font-black transition-all shadow-lg shadow-emerald-500/25 active:scale-95 cursor-pointer flex items-center gap-2"
+          >
+            <span v-if="isCreatingEvent" class="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></span>
+            <span v-else>🚀</span>
+            <span>{{ isCreatingEvent ? 'Menyimpan...' : 'Terbitkan Acara Baru' }}</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
 
   </div>
 </template>
