@@ -73,27 +73,35 @@ function handleSimulatePayment() {
         date: '15 November 2026'
       };
 
-      authStore.addPurchasedTicket({
-        orderId: ticketStore.issuedTicket?.orderId || 'ORD-9821-2026',
+      const purchasedTicketData = {
+        orderId: ticketStore.issuedTicket?.orderId || ticketStore.currentOrderId || 'ORD-9821-2026',
         invoiceNo: ticketStore.paymentDetails?.invoiceNo || 'INV/2026/FT/982103',
         eventTitle: evt.title,
         venue: `${evt.venue}, ${evt.city}`,
         date: evt.date,
-        seatNo: ticketStore.issuedTicket?.seatNo || 'SEAT-1',
-        categoryName: ticketStore.issuedTicket?.categoryName || 'VIP',
+        seatNo: ticketStore.issuedTicket?.seatNo || `${ticketStore.selectedSeatName}`,
+        categoryName: ticketStore.issuedTicket?.categoryName || ticketStore.categoryDetails[ticketStore.selectedCategory]?.name || 'VIP',
         totalPaid: ticketStore.issuedTicket?.totalPaid || ticketStore.grandTotal,
         issuedAt: ticketStore.issuedTicket?.issuedAt || new Date().toLocaleString('id-ID'),
         paymentMethod: selectedChannel.value.name,
         qty: ticketStore.quantity || 1,
         seats: [...ticketStore.selectedSeats],
         attendees: [...ticketStore.attendees],
-      });
+      };
+
+      authStore.addPurchasedTicket(purchasedTicketData);
+
+      notifStore.push(
+        'success',
+        'Pembayaran Sukses!',
+        `Transaksi ${ticketStore.quantity} tiket konser berhasil diverifikasi dan otomatis ditambahkan ke "Tiket Saya".`
+      );
     } catch (e) {
       console.error('Payment confirmation error:', e);
     }
 
     queueStore.setStage('ticket');
-  }, 900);
+  }, 800);
 }
 
 function handleCancel() {
@@ -416,11 +424,11 @@ function handleCancel() {
             :disabled="isVerifyingTransfer"
             class="btn-mono-primary w-full py-4 text-xs font-bold text-center cursor-pointer flex items-center justify-center gap-2"
           >
-            <span v-if="isVerifyingTransfer">⏳ Memeriksa Mutasi Bank di Sistem Real-Time...</span>
-            <span v-else>⚡ Simulasikan Transfer m-Banking Selesai (Verifikasi Bayar) →</span>
+            <span v-if="isVerifyingTransfer">⏳ Memverifikasi Pembayaran &amp; Menerbitkan Tiket...</span>
+            <span v-else>✓ PEMBAYARAN SUKSES (KONFIRMASI BAYAR) →</span>
           </button>
-          <div class="text-[10px] text-[#525252] text-center">
-            Sistem mendengarkan mutasi bank secara real-time. Klik tombol di atas untuk menyelesaikan pesanan.
+          <div class="text-[10px] text-[#525252] text-center font-mono">
+            Klik tombol di atas untuk menyelesaikan pesanan &amp; tiket otomatis masuk ke akun Anda.
           </div>
         </div>
 

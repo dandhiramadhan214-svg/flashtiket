@@ -169,25 +169,50 @@ function autoPickAdjacentSeats(category, count, zone = 'back') {
   }
 
   const available = targetSeats.filter(s => !s.isBooked);
-  const picked = available.slice(0, Math.min(count, available.length)).map(s => s.id);
+  
+  // Keep currently selected seats if they belong to this category and are available
+  const currentKept = selectedSeatsList.value.filter(id => available.some(s => s.id === id));
+  const remainingSlots = count - currentKept.length;
+  
+  let picked = [...currentKept];
+  if (remainingSlots > 0) {
+    const unpicked = available.filter(s => !picked.includes(s.id));
+    picked.push(...unpicked.slice(0, remainingSlots).map(s => s.id));
+  } else if (remainingSlots < 0) {
+    picked = picked.slice(0, count);
+  }
+
+  // Fallback if none picked yet
+  if (picked.length === 0 && available.length > 0) {
+    picked = available.slice(0, Math.min(count, available.length)).map(s => s.id);
+  }
 
   if (picked.length > 0) {
     selectedSeatsList.value = picked;
     ticketStore.setSelectedSeats(picked);
+    ticketStore.setQuantity(picked.length);
   }
 }
 
-// Quantity increment with adjacent auto-select
+// Set specific quantity (1 to 10) directly
+function setSpecificQuantity(newQty) {
+  const targetQty = Math.max(1, Math.min(10, newQty));
+  
+  if (ticketStore.selectedCategory === 'cat1') {
+    ticketStore.setQuantity(targetQty);
+    const passes = Array.from({ length: targetQty }, (_, i) => `CAT1-FEST-${String(i + 1).padStart(2, '0')}`);
+    selectedSeatsList.value = passes;
+    ticketStore.setSelectedSeats(passes);
+    ticketStore.setSelectedSeat(`Festival Standing (${targetQty} Tiket)`, 'CAT 1 Standing Zone', 'cat1');
+  } else {
+    autoPickAdjacentSeats(ticketStore.selectedCategory, targetQty);
+  }
+}
+
+// Quantity increment
 function handleIncrement() {
   if (ticketStore.quantity < 10) {
-    const nextQty = ticketStore.quantity + 1;
-    if (ticketStore.selectedCategory === 'cat1') {
-      ticketStore.incrementQty();
-      selectedSeatsList.value = Array.from({ length: ticketStore.quantity }, (_, i) => `CAT1-FEST-${String.fromCharCode(65 + i)}`);
-    } else {
-      autoPickAdjacentSeats(ticketStore.selectedCategory, nextQty);
-      ticketStore.setQuantity(selectedSeatsList.value.length);
-    }
+    setSpecificQuantity(ticketStore.quantity + 1);
   } else {
     alert('Maksimal pemesanan adalah 10 tiket per transaksi.');
   }
@@ -196,16 +221,7 @@ function handleIncrement() {
 // Quantity decrement
 function handleDecrement() {
   if (ticketStore.quantity > 1) {
-    const nextQty = ticketStore.quantity - 1;
-    if (ticketStore.selectedCategory === 'cat1') {
-      ticketStore.decrementQty();
-      selectedSeatsList.value = Array.from({ length: ticketStore.quantity }, (_, i) => `CAT1-FEST-${String.fromCharCode(65 + i)}`);
-    } else {
-      if (selectedSeatsList.value.length > 1) {
-        selectedSeatsList.value.pop();
-        ticketStore.setSelectedSeats(selectedSeatsList.value);
-      }
-    }
+    setSpecificQuantity(ticketStore.quantity - 1);
   }
 }
 
@@ -536,23 +552,41 @@ const cats = [
           </div>
 
           <!-- Quantity Selector (1 to 10) -->
-          <div class="flex items-center justify-between pt-2">
-            <div>
-              <div class="font-bold text-xs uppercase">Jumlah Tiket Rombongan</div>
-              <div class="text-[10px] text-[#525252]">Maksimal 10 tiket per transaksi</div>
+          <div class="space-y-3 pt-2 border-t border-black">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-xs uppercase">Jumlah Tiket (1–10)</div>
+                <div class="text-[10px] text-[#525252]">Pilih kuantitas atau klik titik kursi di peta</div>
+              </div>
+              <div class="flex items-center border-2 border-black">
+                <button 
+                  @click="handleDecrement()" 
+                  class="w-9 h-9 flex items-center justify-center font-bold text-base text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
+                  title="Kurangi 1 Tiket"
+                >-</button>
+                <span class="font-bold text-base w-10 text-center bg-[#FAFAFA]">{{ ticketStore.quantity }}</span>
+                <button 
+                  @click="handleIncrement()" 
+                  class="w-9 h-9 flex items-center justify-center font-bold text-base text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
+                  title="Tambah 1 Tiket (Auto-Alokasi Berdampingan)"
+                >+</button>
+              </div>
             </div>
-            <div class="flex items-center border-2 border-black">
-              <button 
-                @click="handleDecrement()" 
-                class="w-9 h-9 flex items-center justify-center font-bold text-base text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
-                title="Kurangi 1 Tiket"
-              >-</button>
-              <span class="font-bold text-base w-10 text-center">{{ ticketStore.quantity }}</span>
-              <button 
-                @click="handleIncrement()" 
-                class="w-9 h-9 flex items-center justify-center font-bold text-base text-black hover:bg-black hover:text-white transition-colors cursor-pointer"
-                title="Tambah 1 Tiket (Auto-Alokasi Berdampingan)"
-              >+</button>
+
+            <!-- Quick Number Selection Badges -->
+            <div class="space-y-1">
+              <span class="text-[9px] uppercase tracking-wider text-[#525252]">PILIH CEPAT JUMLAH TIKET:</span>
+              <div class="grid grid-cols-6 gap-1 text-[10px] font-bold">
+                <button
+                  v-for="qty in [1, 2, 3, 4, 5, 6]"
+                  :key="qty"
+                  @click="setSpecificQuantity(qty)"
+                  class="py-1.5 border border-black text-center transition-colors cursor-pointer"
+                  :class="ticketStore.quantity === qty ? 'bg-black text-white font-black' : 'bg-white text-black hover:bg-black hover:text-white'"
+                >
+                  {{ qty }}
+                </button>
+              </div>
             </div>
           </div>
 

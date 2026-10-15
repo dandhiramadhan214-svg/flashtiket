@@ -179,6 +179,25 @@ function handleBackHome() {
       </div>
     </div>
 
+    <!-- Celebration / MyTickets Sync Confirmation Alert -->
+    <div class="border-2 border-black p-4 bg-[#F5F5F5] font-mono text-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="w-8 h-8 bg-black text-white flex items-center justify-center font-bold text-sm shrink-0">✓</span>
+        <div>
+          <div class="font-bold text-black uppercase">PEMBAYARAN SUKSES &amp; TIKET RESMI TERBIT!</div>
+          <div class="text-[11px] text-[#525252]">
+            E-Tiket resmi telah otomatis ditambahkan ke akun Anda di menu "Tiket Saya".
+          </div>
+        </div>
+      </div>
+      <button 
+        @click="authStore.isMyTicketsOpen = true"
+        class="w-full sm:w-auto px-4 py-2 bg-black text-white hover:bg-neutral-800 border border-black font-bold uppercase text-[11px] tracking-wider transition-colors cursor-pointer shrink-0"
+      >
+        🎟️ Buka &amp; Cek di "Tiket Saya" →
+      </button>
+    </div>
+
     <!-- ============================================================ -->
     <!-- TAB 1: E-TICKET PERFORATED CONCERT PASS                      -->
     <!-- ============================================================ -->
@@ -481,6 +500,13 @@ function handleBackHome() {
       </button>
 
       <div class="flex flex-wrap gap-3">
+        <button
+          @click="authStore.isMyTicketsOpen = true"
+          class="border-2 border-black px-5 py-3 font-bold hover:bg-black hover:text-white transition-colors cursor-pointer uppercase flex items-center gap-2"
+        >
+          <span>🎟️ Lihat di "Tiket Saya"</span>
+        </button>
+
         <button
           @click="handleDownloadPdf()"
           :disabled="isDownloadingPdf"
