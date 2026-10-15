@@ -25,6 +25,12 @@ const agreeTerms = ref(true);
 const errorMessage = ref('');
 const isSubmitting = ref(false);
 
+function fillAdminCredentials() {
+  loginEmail.value = 'admin@flashtiket.com';
+  loginPassword.value = 'admin123';
+  handleLoginSubmit();
+}
+
 async function handleLoginSubmit() {
   errorMessage.value = '';
   if (!loginEmail.value || !loginPassword.value) {
@@ -183,6 +189,17 @@ async function handleRegisterSubmit() {
         >
           <span>Masuk ke Sistem →</span>
         </button>
+
+        <!-- Quick 1-Click Admin Access Helper -->
+        <div class="pt-2 border-t border-black/20">
+          <button 
+            type="button"
+            @click="fillAdminCredentials"
+            class="w-full py-2.5 bg-[#F5F5F5] hover:bg-black hover:text-white border border-black font-mono text-[10px] uppercase font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+          >
+            <span>🛡️ Masuk Cepat sebagai Admin (admin@flashtiket.com)</span>
+          </button>
+        </div>
       </form>
 
       <!-- TAB 2: REGISTER FORM -->

@@ -140,7 +140,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         localStorage.setItem('flashtiket_user', JSON.stringify(currentUser.value));
         closeAuthModal();
-        return { success: true, role: 'user', fromCloud: true };
+        return { success: true, role: dbUser.role || 'user', fromCloud: true };
       }
     } catch (e) {
       console.warn('Supabase login check note:', e.message);
