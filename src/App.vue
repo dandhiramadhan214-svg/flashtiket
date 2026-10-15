@@ -13,6 +13,7 @@ import StageTicket from './components/StageTicket.vue';
 import StageWishlist from './components/StageWishlist.vue';
 import StageAdmin from './components/StageAdmin.vue';
 import AuthModal from './components/AuthModal.vue';
+import UserProfileModal from './components/UserProfileModal.vue';
 import MyTicketsModal from './components/MyTicketsModal.vue';
 import HowToBuyModal from './components/HowToBuyModal.vue';
 import ReviewModal from './components/ReviewModal.vue';
@@ -99,6 +100,7 @@ const authStore = useAuthStore();
 
     <!-- Global Modals -->
     <AuthModal />
+    <UserProfileModal />
     <MyTicketsModal />
     <HowToBuyModal />
     <ReviewModal />

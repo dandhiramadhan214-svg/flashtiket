@@ -23,30 +23,45 @@ const regPassword = ref('');
 const agreeTerms = ref(true);
 
 const errorMessage = ref('');
+const isSubmitting = ref(false);
 
-function handleLoginSubmit() {
+async function handleLoginSubmit() {
   errorMessage.value = '';
   if (!loginEmail.value || !loginPassword.value) {
     errorMessage.value = 'Silakan isi email dan kata sandi Anda.';
     return;
   }
 
-  const res = authStore.login(loginEmail.value, loginPassword.value);
-  
-  if (res?.role === 'admin') {
-    queueStore.setStage('admin');
-    notifStore.push('success', 'Role Administrator', 'Login berhasil! Membuka Dashboard Admin.');
-    return;
-  }
+  isSubmitting.value = true;
+  try {
+    const res = await authStore.login(loginEmail.value, loginPassword.value);
+    
+    if (res?.success === false) {
+      errorMessage.value = res.error || 'Login gagal. Periksa kembali email dan kata sandi Anda.';
+      return;
+    }
 
-  ticketStore.customer.name = authStore.currentUser.name;
-  ticketStore.customer.email = authStore.currentUser.email;
-  ticketStore.customer.phone = authStore.currentUser.phone;
-  ticketStore.customer.nik = authStore.currentUser.nik;
-  notifStore.push('info', 'Login Berhasil', `Selamat datang kembali, ${authStore.currentUser.name}!`);
+    if (res?.role === 'admin') {
+      queueStore.setStage('admin');
+      notifStore.push('success', 'Role Administrator', 'Login berhasil! Membuka Dashboard Admin.');
+      return;
+    }
+
+    ticketStore.customer.name = authStore.currentUser.name;
+    ticketStore.customer.email = authStore.currentUser.email;
+    ticketStore.customer.phone = authStore.currentUser.phone;
+    ticketStore.customer.nik = authStore.currentUser.nik;
+
+    const cloudMsg = res?.fromCloud ? ' (Sinkron Cloud Supabase)' : '';
+    notifStore.push('info', 'Login Berhasil', `Selamat datang kembali, ${authStore.currentUser.name}!${cloudMsg}`);
+  } catch (err) {
+    errorMessage.value = 'Terjadi kesalahan sistem saat masuk. Silakan coba lagi.';
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 
-function handleRegisterSubmit() {
+async function handleRegisterSubmit() {
   errorMessage.value = '';
   if (!regName.value || !regEmail.value || !regPhone.value || !regNik.value || !regPassword.value) {
     errorMessage.value = 'Mohon lengkapi seluruh formulir pendaftaran.';
@@ -57,19 +72,31 @@ function handleRegisterSubmit() {
     return;
   }
 
-  authStore.register({
-    name: regName.value,
-    email: regEmail.value,
-    phone: regPhone.value,
-    nik: regNik.value,
-    password: regPassword.value,
-  });
+  isSubmitting.value = true;
+  try {
+    const res = await authStore.register({
+      name: regName.value,
+      email: regEmail.value,
+      phone: regPhone.value,
+      nik: regNik.value,
+      password: regPassword.value,
+    });
 
-  ticketStore.customer.name = regName.value;
-  ticketStore.customer.email = regEmail.value;
-  ticketStore.customer.phone = regPhone.value;
-  ticketStore.customer.nik = regNik.value;
-  notifStore.push('success', 'Pendaftaran Berhasil', 'Akun resmi FlashTiket Anda telah aktif!');
+    if (res?.success === false) {
+      errorMessage.value = res.error || 'Pendaftaran gagal.';
+      return;
+    }
+
+    ticketStore.customer.name = regName.value;
+    ticketStore.customer.email = regEmail.value;
+    ticketStore.customer.phone = regPhone.value;
+    ticketStore.customer.nik = regNik.value;
+    notifStore.push('success', 'Pendaftaran Berhasil', 'Akun resmi FlashTiket Anda telah aktif & tersinkron cloud!');
+  } catch (err) {
+    errorMessage.value = 'Terjadi kendala saat mendaftar. Silakan coba kembali.';
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 </script>
 

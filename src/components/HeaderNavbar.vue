@@ -242,6 +242,13 @@ onBeforeUnmount(() => {
             </button>
 
             <button 
+              @click="authStore.openProfileModal(); isUserMenuOpen = false;"
+              class="w-full text-left px-3 py-2 text-black hover:bg-black hover:text-white transition-colors flex items-center gap-2 cursor-pointer font-bold"
+            >
+              <span>Profil Saya (NIK/Data)</span>
+            </button>
+
+            <button 
               @click="authStore.isMyTicketsOpen = true; isUserMenuOpen = false;"
               class="w-full text-left px-3 py-2 text-black hover:bg-black hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
             >
@@ -324,6 +331,13 @@ onBeforeUnmount(() => {
             class="w-full text-left py-2.5 px-3 border border-transparent hover:border-black hover:bg-black hover:text-white transition-colors cursor-pointer"
           >
             Favorit ({{ wishlistStore.count }})
+          </button>
+
+          <button 
+            @click="authStore.openProfileModal(); closeMobileMenu()"
+            class="w-full text-left py-2.5 px-3 border border-transparent hover:border-black hover:bg-black hover:text-white transition-colors cursor-pointer font-bold"
+          >
+            Profil Saya (NIK: {{ authStore.currentUser.nik }})
           </button>
 
           <button 
