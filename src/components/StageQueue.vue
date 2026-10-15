@@ -3,11 +3,13 @@ import { computed } from 'vue';
 import { useQueueStore } from '../stores/queueStore';
 import { useTicketStore } from '../stores/ticketStore';
 import { useEventsStore } from '../stores/eventsStore';
+import { useAuthStore } from '../stores/authStore';
 import SvgIcon from './SvgIcon.vue';
 
 const queueStore = useQueueStore();
 const ticketStore = useTicketStore();
 const eventsStore = useEventsStore();
+const authStore = useAuthStore();
 
 const currentEvent = computed(() => eventsStore.selectedEvent);
 </script>
@@ -82,13 +84,14 @@ const currentEvent = computed(() => eventsStore.selectedEvent);
           </div>
         </div>
 
-        <!-- Fast Track Bypass Button -->
-        <div class="pt-4 border-t border-black">
+        <!-- Fast Track Bypass Button (Khusus Admin / Developer) -->
+        <div v-if="authStore.isAdmin" class="pt-4 border-t border-black flex flex-col items-center gap-1.5">
+          <span class="text-[10px] font-mono text-[#525252] uppercase">[Akses Administrator Khusus]</span>
           <button
             @click="queueStore.skipQueue()"
             class="btn-mono-secondary text-xs"
           >
-            <span>[Bypass Jalur Demo / Akselerasi Antrean] →</span>
+            <span>[Admin Bypass Antrean / Fast Track] →</span>
           </button>
         </div>
       </div>
