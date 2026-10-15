@@ -187,15 +187,26 @@ export const useAuthStore = defineStore('auth', () => {
         return { success: false, error: 'Email ini sudah terdaftar di FlashTiket. Silakan masuk (login).' };
       }
 
-      const { error: insErr } = await supabase.from('users').insert({
+      const userPayload = {
         id: userId,
         name,
         email: cleanEmail,
         phone,
         nik,
-        password,
         role: 'user',
-      });
+      };
+      if (password) {
+        userPayload.password = password;
+      }
+
+      let { error: insErr } = await supabase.from('users').insert(userPayload);
+
+      // If Supabase table does not have 'password' column, fallback and insert without it
+      if (insErr && insErr.message && insErr.message.toLowerCase().includes('password')) {
+        delete userPayload.password;
+        const retryRes = await supabase.from('users').insert(userPayload);
+        insErr = retryRes.error;
+      }
 
       if (insErr) {
         console.warn('Supabase users insert note:', insErr.message);
